@@ -16,17 +16,49 @@
           </div>
         </div>
       }
+
+      @for (room of rooms(); track room.name) {
+        <div class="contact" [class.active]="room === activeRoom()" (click)="selectRoom(room)">
+          <div class="avatar room">#</div>
+          <div class="contact-info">
+            <div class="contact-name">{{ room.name }}</div>
+            <div class="contact-last">{{ room.lastMessage() || room.members().length + ' membres' }}</div>
+          </div>
+        </div>
+      }
     </div>
 
     <div class="users-section">
-      <div class="section-title">✦ usuaris</div>
+      <div class="users-header">
+        <span class="section-title">✦ usuaris</span>
+        <button class="group-toggle" (click)="toggleGroupMode()">
+          {{ creatingGroup() ? '✕ cancel·lar' : '＋ grup' }}
+        </button>
+      </div>
+
+      @if (creatingGroup()) {
+        <div class="group-create">
+          <input
+            type="text"
+            class="chat-input"
+            [(ngModel)]="groupName"
+            placeholder="nom del grup..." />
+          <button class="send-btn" [disabled]="!canCreateGroup()" (click)="createGroup()">crear ✦</button>
+        </div>
+      }
+
       @for (user of availableUsers(); track user.name) {
-        <div class="user-item" (click)="startChat(user)">
+        <div class="user-item"
+             [class.selected]="creatingGroup() && isSelected(user.name)"
+             (click)="onUserClick(user)">
           <div class="avatar" [class.online]="user.online">{{ user.initials }}</div>
           <div class="contact-info">
             <div class="contact-name">{{ user.name }}</div>
             <div class="contact-last">{{ user.online ? 'en línia' : 'desconnectat/da' }}</div>
           </div>
+          @if (creatingGroup()) {
+            <div class="check">{{ isSelected(user.name) ? '☑' : '☐' }}</div>
+          }
         </div>
       }
     </div>
@@ -34,22 +66,22 @@
   </div>
 
   <div class="chat-area">
-    @if (activeContact(); as active) {
+    @if (active(); as a) {
       <div class="chat-header">
         <div class="chat-with">
-          <div class="avatar small" [class.online]="active.online">
-            {{ active.initials }}
+          <div class="avatar small" [class.online]="a.online" [class.room]="a.isRoom">
+            {{ a.initials }}
           </div>
           <div>
-            <div class="chat-title">{{ active.name }}</div>
-            <div class="chat-status">{{ active.online ? 'en línia ✦' : 'desconnectat/da' }}</div>
+            <div class="chat-title">{{ a.title }}</div>
+            <div class="chat-status">{{ a.subtitle }}</div>
           </div>
         </div>
         <span class="chat-deco">✧ ✦ ✧</span>
       </div>
 
       <div class="messages" #messagesContainer>
-        @for (msg of active.messages(); track $index) {
+        @for (msg of a.messages(); track $index) {
           <div class="msg-row" [class.me]="msg.isMe">
             <span class="msg-meta">{{ msg.sender }}</span>
             <div class="bubble" [class.me]="msg.isMe">
@@ -73,7 +105,7 @@
       <div class="empty-state">
         <div class="empty-icon">✦</div>
         <div class="empty-title">cap conversa seleccionada</div>
-        <div class="empty-text">tria un usuari per començar a xerrar</div>
+        <div class="empty-text">tria un usuari o grup per començar a xerrar</div>
       </div>
     }
   </div>

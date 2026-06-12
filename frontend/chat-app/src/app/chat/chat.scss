@@ -99,6 +99,63 @@ html, body {
   &:hover:not(.active) {
     background: #d4e8f8;
   }
+
+  &.selected {
+    background: #cfe6fa;
+    border-color: #378add;
+  }
+
+  .check {
+    margin-left: auto;
+    font-size: 13px;
+    color: #378add;
+    flex-shrink: 0;
+  }
+}
+
+.users-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.group-toggle {
+  background: none;
+  border: 1.5px solid #85b7eb;
+  border-radius: 8px;
+  color: #378add;
+  font-size: 9px;
+  font-weight: 500;
+  padding: 2px 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #d4e8f8;
+  }
+}
+
+.group-create {
+  display: flex;
+  gap: 4px;
+  padding: 2px 0;
+  flex-shrink: 0;
+
+  .chat-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .send-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+
+    &:disabled {
+      background: #b5d4f4;
+      cursor: not-allowed;
+    }
+  }
 }
 
 .contact-info {
@@ -153,6 +210,14 @@ html, body {
     width: 24px;
     height: 24px;
     font-size: 9px;
+  }
+
+  &.room {
+    background: #a3d9c4;
+    border-color: #5DCAA5;
+    color: #14483a;
+    font-size: 13px;
+    font-weight: 600;
   }
 }
 
