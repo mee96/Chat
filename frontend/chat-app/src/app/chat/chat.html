@@ -20,7 +20,7 @@
 
     <div class="users-section">
       <div class="section-title">✦ usuaris</div>
-      @for (user of availableUsers; track user.name) {
+      @for (user of availableUsers(); track user.name) {
         <div class="user-item" (click)="startChat(user)">
           <div class="avatar" [class.online]="user.online">{{ user.initials }}</div>
           <div class="contact-info">

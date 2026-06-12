@@ -35,12 +35,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   readonly contacts = signal<Contact[]>([]);
 
-  readonly availableUsers: User[] = [
-    { name: 'alma', initials: 'AL', online: true },
-    { name: 'berta', initials: 'BE', online: true },
-    { name: 'carme', initials: 'CM', online: true },
-    { name: 'ryuu', initials: 'RY', online: true },
-  ];
+  readonly availableUsers = signal<User[]>([]);
 
   readonly activeContact = signal<Contact | null>(null);
   private socket!: WebSocket;
@@ -57,7 +52,23 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.socket = new WebSocket(`wss://chat-backend-6g1r.onrender.com/ws/${this.myName()}`);
 
     this.socket.onmessage = (event) => {
-      const [sender, ...rest] = event.data.split(':');
+      const data: string = event.data;
+
+      if (data.startsWith('SYSTEM:users:')) {
+        const names = data.slice('SYSTEM:users:'.length)
+          .split(',')
+          .map(n => n.trim())
+          .filter(n => n && n !== this.myName());
+
+        this.availableUsers.set(names.map(name => ({
+          name,
+          initials: name.slice(0, 2).toUpperCase(),
+          online: true
+        })));
+        return;
+      }
+
+      const [sender, ...rest] = data.split(':');
       const text = rest.join(':');
 
       if (sender === this.myName()) return;
