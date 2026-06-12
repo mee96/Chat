@@ -1,0 +1,80 @@
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="my-name">✦ {{ myName() }} ✦</div>
+      <div class="sidebar-title">missatges</div>
+    </div>
+
+    <div class="chats-section">
+      <div class="section-title">💬 chats</div>
+      @for (contact of contacts(); track contact.name) {
+        <div class="contact" [class.active]="contact === activeContact()" (click)="selectContact(contact)">
+          <div class="avatar" [class.online]="contact.online">{{ contact.initials }}</div>
+          <div class="contact-info">
+            <div class="contact-name">{{ contact.name }}</div>
+            <div class="contact-last">{{ contact.lastMessage() }}</div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="users-section">
+      <div class="section-title">✦ usuaris</div>
+      @for (user of availableUsers; track user.name) {
+        <div class="user-item" (click)="startChat(user)">
+          <div class="avatar" [class.online]="user.online">{{ user.initials }}</div>
+          <div class="contact-info">
+            <div class="contact-name">{{ user.name }}</div>
+            <div class="contact-last">{{ user.online ? 'en línia' : 'desconnectat/da' }}</div>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <div class="chat-area">
+    @if (activeContact(); as active) {
+      <div class="chat-header">
+        <div class="chat-with">
+          <div class="avatar small" [class.online]="active.online">
+            {{ active.initials }}
+          </div>
+          <div>
+            <div class="chat-title">{{ active.name }}</div>
+            <div class="chat-status">{{ active.online ? 'en línia ✦' : 'desconnectat/da' }}</div>
+          </div>
+        </div>
+        <span class="chat-deco">✧ ✦ ✧</span>
+      </div>
+
+      <div class="messages" #messagesContainer>
+        @for (msg of active.messages(); track $index) {
+          <div class="msg-row" [class.me]="msg.isMe">
+            <span class="msg-meta">{{ msg.sender }}</span>
+            <div class="bubble" [class.me]="msg.isMe">
+              {{ msg.text }}
+              <span class="ts">{{ msg.time }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="input-row">
+        <input
+          type="text"
+          class="chat-input"
+          [(ngModel)]="newMessage"
+          (keydown.enter)="sendMessage()"
+          placeholder="escriu un missatge..." />
+        <button class="send-btn" (click)="sendMessage()">enviar ✦</button>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">✦</div>
+        <div class="empty-title">cap conversa seleccionada</div>
+        <div class="empty-text">tria un usuari per començar a xerrar</div>
+      </div>
+    }
+  </div>
+</div>

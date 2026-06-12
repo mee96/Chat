@@ -1,0 +1,15 @@
+<p>login works!</p>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-deco">✦ ✧ ✦</div>
+    <div class="login-title">benvinguda!</div>
+    <div class="login-sub">quin és el teu nom?</div>
+    <input
+      type="text"
+      class="login-input"
+      [(ngModel)]="username"
+      (keydown.enter)="enter()"
+      placeholder="el teu nom..." />
+    <button class="login-btn" (click)="enter()">entrar ✦</button>
+  </div>
+</div>

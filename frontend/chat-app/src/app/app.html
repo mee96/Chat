@@ -1,0 +1,5 @@
+@if (username) {
+  <app-chat [myName]="username"></app-chat>
+} @else {
+  <app-login (userLogged)="onUserLogged($event)"></app-login>
+}
