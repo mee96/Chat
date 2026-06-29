@@ -2,9 +2,12 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 import json
+import logging
 import os
 
 from groq import AsyncGroq
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -42,7 +45,7 @@ async def call_groq(messages: list[dict]) -> tuple[str, dict]:
         model=GROQ_MODEL,
         messages=messages,
     )
-    text = response.choices[0].message.content
+    text = response.choices[0].message.content or ""
     usage = {
         "prompt_tokens": response.usage.prompt_tokens,
         "completion_tokens": response.usage.completion_tokens,
@@ -96,6 +99,7 @@ class ConnectionManager:
         try:
             reply, usage = await call_groq(history)
         except Exception:
+            logger.exception("Groq call failed for %s", username)
             await self.send_text(
                 username,
                 "AI:" + json.dumps(
