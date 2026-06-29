@@ -181,6 +181,26 @@ class ConnectionManager:
                 continue
             await self.send_text(user, payload)
 
+        if YUKI_MEMBER in members:
+            await self._handle_room_ai(room_name, sender, message)
+
+    async def _handle_room_ai(self, room_name: str, sender: str, message: str):
+        history = self._ensure_room_history(room_name)
+        history.append({"role": "user", "content": f"{sender}: {message}"})
+        if "@yuki" not in message.lower():
+            return
+        try:
+            reply, usage = await call_groq(history)
+        except Exception:
+            logger.exception("Groq room call failed for %s", room_name)
+            return
+        history.append({"role": "assistant", "content": reply})
+        payload = "ROOMAI:" + room_name + ":" + json.dumps(
+            {"text": reply, "usage": usage}
+        )
+        for user in self.rooms.get(room_name, []):
+            await self.send_text(user, payload)
+
     async def send_user_rooms(self, username: str):
         # Re-sync rooms this user already belongs to (e.g. after reconnect).
         for room_name, members in self.rooms.items():
