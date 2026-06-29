@@ -414,3 +414,47 @@ html, body {
   color: #b3578a;
   cursor: pointer;
 }
+
+.back-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #0c447c;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .app {
+    grid-template-columns: 1fr;
+    height: 100dvh;
+    padding: 0;
+    gap: 0;
+    border-radius: 0;
+  }
+
+  .sidebar {
+    height: 100dvh;
+  }
+
+  .chat-area {
+    display: none;
+    height: 100dvh;
+  }
+
+  .app.show-chat .sidebar {
+    display: none;
+  }
+
+  .app.show-chat .chat-area {
+    display: flex;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+  }
+}

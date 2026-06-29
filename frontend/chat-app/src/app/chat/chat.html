@@ -1,4 +1,4 @@
-<div class="app">
+<div class="app" [class.show-chat]="!!active()">
   <div class="sidebar">
     <div class="sidebar-header">
       <div class="my-name">✦ {{ myName() }} ✦</div>
@@ -82,6 +82,7 @@
     @if (active(); as a) {
       <div class="chat-header">
         <div class="chat-with">
+          <button class="back-btn" type="button" aria-label="Enrere" (click)="closeConversation()">←</button>
           <div class="avatar small" [class.online]="a.online" [class.room]="a.isRoom" [class.ai]="a.isAi">
             @if (a.isAi) {
               <img ngSrc="michi-avatar.png" fill alt="Yuki" class="avatar-img" />

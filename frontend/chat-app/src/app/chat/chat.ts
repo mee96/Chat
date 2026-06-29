@@ -327,6 +327,12 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.activeRoom.set(room);
   }
 
+  closeConversation() {
+    this.activeContact.set(null);
+    this.activeRoom.set(null);
+    this.activeAi.set(false);
+  }
+
   onUserClick(user: User) {
     if (this.creatingGroup()) {
       this.toggleUserSelection(user.name);
