@@ -28,6 +28,8 @@ app.add_middleware(
 
 MAX_ROOMS_PER_USER = 3
 
+YUKI_MEMBER = "Yuki"
+
 GROQ_MODEL = "llama-3.1-8b-instant"
 
 AI_SYSTEM_PROMPT = (
@@ -65,6 +67,7 @@ class ConnectionManager:
     def __init__(self):
         self.connections: dict[str, WebSocket] = {}
         self.rooms: dict[str, list[str]] = {}
+        self.room_ai_histories: dict[str, list[dict]] = {}
         self.ai_histories: dict[str, list[dict]] = {}
 
     async def connect(self, username: str, websocket: WebSocket):
@@ -126,6 +129,13 @@ class ConnectionManager:
 
     # ---- Rooms ----
 
+    def _ensure_room_history(self, room_name: str) -> list[dict]:
+        history = self.room_ai_histories.get(room_name)
+        if history is None:
+            history = [{"role": "system", "content": AI_SYSTEM_PROMPT}]
+            self.room_ai_histories[room_name] = history
+        return history
+
     def _room_count(self, user: str) -> int:
         return sum(1 for members in self.rooms.values() if user in members)
 
@@ -145,7 +155,7 @@ class ConnectionManager:
         for user in desired:
             if user in final_members:
                 continue
-            if self._room_count(user) >= MAX_ROOMS_PER_USER:
+            if user != YUKI_MEMBER and self._room_count(user) >= MAX_ROOMS_PER_USER:
                 await self.send_text(
                     user, f"SYSTEM:error:room limit reached ({MAX_ROOMS_PER_USER})"
                 )
