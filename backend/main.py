@@ -1,6 +1,11 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
+import json
+import os
+
+from groq import AsyncGroq
+
 app = FastAPI()
 
 app.add_middleware(
@@ -13,10 +18,44 @@ app.add_middleware(
 
 MAX_ROOMS_PER_USER = 3
 
+GROQ_MODEL = "llama-3.1-8b-instant"
+
+AI_SYSTEM_PROMPT = (
+    "Et dius Yuki i ets l'assistent d'aquest xat. Ets dolça, amable i una mica "
+    "kawaii en el to: pots fer servir alguna expressió tendra de tant en tant, "
+    "sense exagerar. Respon SEMPRE en català. Si et pregunten qui ets, presenta't "
+    "com la Yuki, l'assistent del xat."
+)
+
+_groq_client: AsyncGroq | None = None
+
+
+def get_groq_client() -> AsyncGroq:
+    global _groq_client
+    if _groq_client is None:
+        _groq_client = AsyncGroq(api_key=os.environ.get("GROQ_API_KEY"))
+    return _groq_client
+
+
+async def call_groq(messages: list[dict]) -> tuple[str, dict]:
+    response = await get_groq_client().chat.completions.create(
+        model=GROQ_MODEL,
+        messages=messages,
+    )
+    text = response.choices[0].message.content
+    usage = {
+        "prompt_tokens": response.usage.prompt_tokens,
+        "completion_tokens": response.usage.completion_tokens,
+        "total_tokens": response.usage.total_tokens,
+    }
+    return text, usage
+
+
 class ConnectionManager:
     def __init__(self):
         self.connections: dict[str, WebSocket] = {}
         self.rooms: dict[str, list[str]] = {}
+        self.ai_histories: dict[str, list[dict]] = {}
 
     async def connect(self, username: str, websocket: WebSocket):
         await websocket.accept()
@@ -43,6 +82,32 @@ class ConnectionManager:
     async def broadcast_user_list(self):
         users = ",".join(self.connections.keys())
         await self.broadcast(f"SYSTEM:users:{users}")
+
+    def _ensure_ai_history(self, username: str) -> list[dict]:
+        history = self.ai_histories.get(username)
+        if history is None:
+            history = [{"role": "system", "content": AI_SYSTEM_PROMPT}]
+            self.ai_histories[username] = history
+        return history
+
+    async def handle_ai_message(self, username: str, text: str):
+        history = self._ensure_ai_history(username)
+        history.append({"role": "user", "content": text})
+        try:
+            reply, usage = await call_groq(history)
+        except Exception:
+            await self.send_text(
+                username,
+                "AI:" + json.dumps(
+                    {"text": "⚠️ no s'ha pogut contactar amb la IA", "usage": None}
+                ),
+            )
+            return
+        history.append({"role": "assistant", "content": reply})
+        await self.send_text(
+            username,
+            "AI:" + json.dumps({"text": reply, "usage": usage}),
+        )
 
     # ---- Rooms ----
 
@@ -118,6 +183,9 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             elif data.startswith("ROOM:"):
                 _, room_name, message = data.split(":", 2)
                 await manager.send_to_room(username, room_name, message)
+
+            elif data.startswith("AI:"):
+                await manager.handle_ai_message(username, data[len("AI:"):])
 
             else:
                 receiver, message = data.split(":", 1)
