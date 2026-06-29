@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, input, signal, computed, WritableSignal, viewChild, effect, ElementRef } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AI_ROOM, AiUsage, parseAiPayload } from './ai-protocol';
+import { AI_ROOM, AiUsage, parseAiPayload, YUKI_MEMBER } from './ai-protocol';
 import { resolveWsBase } from './ws-url';
 import { TooltipDirective } from './tooltip.directive';
 
@@ -64,6 +64,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   readonly creatingGroup = signal(false);
   readonly selectedForGroup = signal<string[]>([]);
   groupName = '';
+  addYuki = false;
   private readonly pendingRoom = signal<string | null>(null);
 
   private socket!: WebSocket;
@@ -175,6 +176,11 @@ export class ChatComponent implements OnInit, OnDestroy {
         return;
       }
 
+      if (data.startsWith('ROOMAI:')) {
+        this.handleRoomAiMessage(data.slice('ROOMAI:'.length));
+        return;
+      }
+
       // Direct message: sender:message
       const [sender, ...rest] = data.split(':');
       const text = rest.join(':');
@@ -254,6 +260,34 @@ export class ChatComponent implements OnInit, OnDestroy {
     room.lastMessage.set(text);
   }
 
+  // ROOMAI:roomname:{json}  — resposta de la Yuki repartida a una sala
+  private handleRoomAiMessage(rest: string) {
+    const idx = rest.indexOf(':');
+    if (idx === -1) return;
+    const roomName = rest.slice(0, idx);
+    const json = rest.slice(idx + 1);
+
+    const room = this.rooms().find(r => r.name === roomName);
+    if (!room) return;
+
+    let payload;
+    try {
+      payload = parseAiPayload(json);
+    } catch {
+      console.warn('Invalid ROOMAI payload', json);
+      return;
+    }
+
+    room.messages.update(msgs => [...msgs, {
+      text: payload.text,
+      sender: YUKI_MEMBER,
+      time: this.getTime(),
+      isMe: false,
+      usage: payload.usage ?? undefined
+    }]);
+    room.lastMessage.set(payload.text);
+  }
+
   private handleAiMessage(json: string) {
     this.aiTyping.set(false);
 
@@ -324,6 +358,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!next) {
       this.selectedForGroup.set([]);
       this.groupName = '';
+      this.addYuki = false;
     }
   }
 
@@ -343,7 +378,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   createGroup() {
     const name = this.groupName.trim();
-    const members = this.selectedForGroup();
+    const members = [...this.selectedForGroup()];
     if (!name || members.length === 0) return;
 
     if (this.socket?.readyState !== WebSocket.OPEN) {
@@ -351,11 +386,16 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.addYuki) {
+      members.push(YUKI_MEMBER);
+    }
+
     this.socket.send(`JOIN:${name}:${members.join(',')}`);
     this.pendingRoom.set(name);
 
     this.groupName = '';
     this.selectedForGroup.set([]);
+    this.addYuki = false;
     this.creatingGroup.set(false);
   }
 

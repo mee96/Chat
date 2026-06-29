@@ -405,3 +405,12 @@ html, body {
   cursor: default;
   outline: none;
 }
+
+.yuki-check {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #b3578a;
+  cursor: pointer;
+}

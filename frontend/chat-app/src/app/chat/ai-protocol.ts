@@ -1,4 +1,5 @@
 export const AI_ROOM = 'Chat amb IA';
+export const YUKI_MEMBER = 'Yuki';
 
 export interface AiUsage {
   prompt: number;

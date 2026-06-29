@@ -52,6 +52,10 @@
             class="chat-input"
             [(ngModel)]="groupName"
             placeholder="nom del grup..." />
+          <label class="yuki-check">
+            <input type="checkbox" [(ngModel)]="addYuki" />
+            Afegir la Yuki
+          </label>
           <button class="send-btn" [disabled]="!canCreateGroup()" (click)="createGroup()">crear ✦</button>
         </div>
       }
