@@ -8,7 +8,9 @@
     <div class="chats-section">
       <div class="section-title">💬 chats</div>
       <div class="contact ai" [class.active]="activeAi()" (click)="selectAi()">
-        <div class="avatar ai">🤖</div>
+        <div class="avatar ai">
+          <img ngSrc="michi-avatar.png" fill alt="Yuki" class="avatar-img" />
+        </div>
         <div class="contact-info">
           <div class="contact-name">Chat amb IA</div>
           <div class="contact-last">{{ aiChat.lastMessage() || 'parla amb la Yuki ✦' }}</div>
@@ -76,8 +78,12 @@
     @if (active(); as a) {
       <div class="chat-header">
         <div class="chat-with">
-          <div class="avatar small" [class.online]="a.online" [class.room]="a.isRoom">
-            {{ a.initials }}
+          <div class="avatar small" [class.online]="a.online" [class.room]="a.isRoom" [class.ai]="a.isAi">
+            @if (a.isAi) {
+              <img ngSrc="michi-avatar.png" fill alt="Yuki" class="avatar-img" />
+            } @else {
+              {{ a.initials }}
+            }
           </div>
           <div>
             <div class="chat-title">{{ a.title }}</div>
@@ -98,16 +104,12 @@
             @if (msg.usage; as u) {
               <span
                 class="tokens"
-                [title]="'prompt: ' + u.prompt + ' · resposta: ' + u.completion + ' · total: ' + u.total">
+                tabindex="0"
+                [appTooltip]="'prompt: ' + u.prompt + ' · resposta: ' + u.completion + ' · total: ' + u.total"
+                [attr.aria-label]="'tokens — prompt: ' + u.prompt + ', resposta: ' + u.completion + ', total: ' + u.total">
                 {{ u.total }} tokens
               </span>
             }
-          </div>
-        }
-        @if (a.isAi && aiTyping()) {
-          <div class="msg-row">
-            <span class="msg-meta">Chat amb IA</span>
-            <div class="bubble typing">escrivint…</div>
           </div>
         }
       </div>

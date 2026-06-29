@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy, input, signal, computed, WritableSignal, viewChild, effect, ElementRef } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AI_ROOM, AiUsage, parseAiPayload } from './ai-protocol';
 import { resolveWsBase } from './ws-url';
+import { TooltipDirective } from './tooltip.directive';
 
 interface Message {
   text: string;
@@ -34,7 +36,7 @@ interface User {
 
 @Component({
   selector: 'app-chat',
-  imports: [FormsModule],
+  imports: [FormsModule, NgOptimizedImage, TooltipDirective],
   templateUrl: './chat.html',
   styleUrl: './chat.scss'
 })
