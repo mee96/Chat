@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy, input, signal, computed, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AI_ROOM, AiUsage, parseAiPayload } from './ai-protocol';
 
 interface Message {
   text: string;
   sender: string;
   time: string;
   isMe: boolean;
+  usage?: AiUsage;
 }
 
 interface Contact {
@@ -47,6 +49,14 @@ export class ChatComponent implements OnInit, OnDestroy {
   readonly activeContact = signal<Contact | null>(null);
   readonly activeRoom = signal<Room | null>(null);
 
+  readonly aiChat = {
+    name: AI_ROOM,
+    messages: signal<Message[]>([]),
+    lastMessage: signal('')
+  };
+  readonly activeAi = signal(false);
+  readonly aiTyping = signal(false);
+
   // Group creation UI state
   readonly creatingGroup = signal(false);
   readonly selectedForGroup = signal<string[]>([]);
@@ -57,6 +67,17 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   // Unified view of whatever conversation is active (direct or room).
   readonly active = computed(() => {
+    if (this.activeAi()) {
+      return {
+        title: this.aiChat.name,
+        subtitle: this.aiTyping() ? 'escrivint…' : 'sempre disponible ✦',
+        initials: '🤖',
+        online: true,
+        isRoom: false,
+        isAi: true,
+        messages: this.aiChat.messages,
+      };
+    }
     const c = this.activeContact();
     if (c) {
       return {
@@ -65,6 +86,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         initials: c.initials,
         online: c.online,
         isRoom: false,
+        isAi: false,
         messages: c.messages,
       };
     }
@@ -76,6 +98,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         initials: '#',
         online: false,
         isRoom: true,
+        isAi: false,
         messages: r.messages,
       };
     }
@@ -95,6 +118,11 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.socket.onmessage = (event) => {
       const data: string = event.data;
+
+      if (data.startsWith('AI:')) {
+        this.handleAiMessage(data.slice('AI:'.length));
+        return;
+      }
 
       if (data.startsWith('SYSTEM:users:')) {
         const names = data.slice('SYSTEM:users:'.length)
@@ -205,12 +233,41 @@ export class ChatComponent implements OnInit, OnDestroy {
     room.lastMessage.set(text);
   }
 
+  private handleAiMessage(json: string) {
+    this.aiTyping.set(false);
+
+    let payload;
+    try {
+      payload = parseAiPayload(json);
+    } catch {
+      console.warn('Invalid AI payload', json);
+      return;
+    }
+
+    this.aiChat.messages.update(msgs => [...msgs, {
+      text: payload.text,
+      sender: AI_ROOM,
+      time: this.getTime(),
+      isMe: false,
+      usage: payload.usage ?? undefined
+    }]);
+    this.aiChat.lastMessage.set(payload.text);
+  }
+
+  selectAi() {
+    this.activeContact.set(null);
+    this.activeRoom.set(null);
+    this.activeAi.set(true);
+  }
+
   selectContact(contact: Contact) {
+    this.activeAi.set(false);
     this.activeRoom.set(null);
     this.activeContact.set(contact);
   }
 
   selectRoom(room: Room) {
+    this.activeAi.set(false);
     this.activeContact.set(null);
     this.activeRoom.set(room);
   }
@@ -294,6 +351,20 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     if (this.socket?.readyState !== WebSocket.OPEN) {
       console.warn('WebSocket is not open; message not sent');
+      return;
+    }
+
+    if (this.activeAi()) {
+      this.socket.send('AI:' + text);
+      this.aiChat.messages.update(msgs => [...msgs, {
+        text,
+        sender: this.myName(),
+        time: this.getTime(),
+        isMe: true
+      }]);
+      this.aiChat.lastMessage.set(text);
+      this.aiTyping.set(true);
+      this.newMessage = '';
       return;
     }
 
