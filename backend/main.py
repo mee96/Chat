@@ -4,8 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 import logging
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 from groq import AsyncGroq
+
+# Load backend/.env regardless of the working directory uvicorn is launched from.
+# Existing environment variables (e.g. those set by Render) take precedence.
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
