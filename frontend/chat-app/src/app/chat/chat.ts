@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, input, signal, computed, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AI_ROOM, AiUsage, parseAiPayload } from './ai-protocol';
+import { resolveWsBase } from './ws-url';
 
 interface Message {
   text: string;
@@ -114,7 +115,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   connectWebSocket() {
-    this.socket = new WebSocket(`wss://chat-backend-6g1r.onrender.com/ws/${this.myName()}`);
+    const base = resolveWsBase(window.location.hostname);
+    this.socket = new WebSocket(`${base}/ws/${this.myName()}`);
 
     this.socket.onmessage = (event) => {
       const data: string = event.data;

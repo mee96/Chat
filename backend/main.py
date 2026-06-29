@@ -7,6 +7,7 @@ import os
 
 from groq import AsyncGroq
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
@@ -94,6 +95,7 @@ class ConnectionManager:
         return history
 
     async def handle_ai_message(self, username: str, text: str):
+        logger.info("AI: branch reached — message from %s: %r", username, text)
         history = self._ensure_ai_history(username)
         history.append({"role": "user", "content": text})
         try:
@@ -108,6 +110,9 @@ class ConnectionManager:
             )
             return
         history.append({"role": "assistant", "content": reply})
+        logger.info(
+            "AI: reply sent to %s (%s tokens)", username, usage["total_tokens"]
+        )
         await self.send_text(
             username,
             "AI:" + json.dumps({"text": reply, "usage": usage}),
