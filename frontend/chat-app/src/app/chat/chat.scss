@@ -379,3 +379,30 @@ html, body {
     background: #185fa5;
   }
 }
+
+.avatar.ai {
+  background: #f7a8c4;
+  border-color: #e06a98;
+  color: #6b1f3d;
+}
+
+.contact.ai {
+  &.active {
+    background: #fbdce8;
+    border-color: #e06a98;
+  }
+}
+
+.tokens {
+  font-size: 9px;
+  color: #b3578a;
+  padding: 0 4px;
+  cursor: help;
+}
+
+.bubble.typing {
+  background: #fbdce8;
+  border: 1.5px solid #f7a8c4;
+  color: #b3578a;
+  font-style: italic;
+}

@@ -7,6 +7,13 @@
 
     <div class="chats-section">
       <div class="section-title">💬 chats</div>
+      <div class="contact ai" [class.active]="activeAi()" (click)="selectAi()">
+        <div class="avatar ai">🤖</div>
+        <div class="contact-info">
+          <div class="contact-name">Chat amb IA</div>
+          <div class="contact-last">{{ aiChat.lastMessage() || 'parla amb la Yuki ✦' }}</div>
+        </div>
+      </div>
       @for (contact of contacts(); track contact.name) {
         <div class="contact" [class.active]="contact === activeContact()" (click)="selectContact(contact)">
           <div class="avatar" [class.online]="contact.online">{{ contact.initials }}</div>
@@ -88,6 +95,19 @@
               {{ msg.text }}
               <span class="ts">{{ msg.time }}</span>
             </div>
+            @if (msg.usage; as u) {
+              <span
+                class="tokens"
+                [title]="'prompt: ' + u.prompt + ' · resposta: ' + u.completion + ' · total: ' + u.total">
+                {{ u.total }} tokens
+              </span>
+            }
+          </div>
+        }
+        @if (a.isAi && aiTyping()) {
+          <div class="msg-row">
+            <span class="msg-meta">Chat amb IA</span>
+            <div class="bubble typing">escrivint…</div>
           </div>
         }
       </div>
