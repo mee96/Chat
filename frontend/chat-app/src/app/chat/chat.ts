@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, input, signal, computed, WritableSignal } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, signal, computed, WritableSignal, viewChild, effect, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AI_ROOM, AiUsage, parseAiPayload } from './ai-protocol';
 import { resolveWsBase } from './ws-url';
@@ -65,6 +65,23 @@ export class ChatComponent implements OnInit, OnDestroy {
   private readonly pendingRoom = signal<string | null>(null);
 
   private socket!: WebSocket;
+
+  private readonly messagesContainer = viewChild<ElementRef<HTMLDivElement>>('messagesContainer');
+
+  constructor() {
+    // Auto-scroll to the newest message whenever the open conversation's
+    // message list changes (sent or received), the typing indicator toggles,
+    // or the active conversation switches.
+    effect(() => {
+      this.active()?.messages().length; // track the visible message list
+      this.aiTyping();                  // track the "escrivint…" indicator
+      const el = this.messagesContainer()?.nativeElement;
+      if (el) {
+        // Defer until the DOM has rendered the new content.
+        setTimeout(() => (el.scrollTop = el.scrollHeight));
+      }
+    });
+  }
 
   // Unified view of whatever conversation is active (direct or room).
   readonly active = computed(() => {
