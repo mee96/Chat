@@ -1,5 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* On mobile the chat fills the whole screen, so drop the browser's default
+   body margin (the component stylesheet's reset is view-encapsulated and does
+   not reach <body>). Desktop keeps its current behaviour. */
+@media (max-width: 768px) {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+}
+
 /* Kawaii tooltip (cursor-following, appended to <body> by TooltipDirective) */
 .kawaii-tooltip {
   position: fixed;
