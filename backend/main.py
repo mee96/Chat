@@ -67,6 +67,7 @@ class ConnectionManager:
         self.rooms: dict[str, list[str]] = {}
         self.room_ai_histories: dict[str, list[dict]] = {}
         self.ai_histories: dict[str, list[dict]] = {}
+        self.direct_ai_histories: dict[str, list[dict]] = {}
 
     async def connect(self, username: str, websocket: WebSocket):
         await websocket.accept()
@@ -83,8 +84,35 @@ class ConnectionManager:
             except Exception:
                 self.connections.pop(username, None)
 
+    @staticmethod
+    def _pair_key(a: str, b: str) -> str:
+        return "|".join(sorted([a, b]))
+
+    def _ensure_direct_history(self, key: str) -> list[dict]:
+        history = self.direct_ai_histories.get(key)
+        if history is None:
+            history = [{"role": "system", "content": AI_SYSTEM_PROMPT}]
+            self.direct_ai_histories[key] = history
+        return history
+
+    async def _handle_direct_ai(self, sender: str, receiver: str, message: str):
+        history = self._ensure_direct_history(self._pair_key(sender, receiver))
+        history.append({"role": "user", "content": f"{sender}: {message}"})
+        if "@yuki" not in message.lower():
+            return
+        try:
+            reply, usage = await call_groq(history)
+        except Exception:
+            logger.exception("Groq direct call failed for %s/%s", sender, receiver)
+            return
+        history.append({"role": "assistant", "content": reply})
+        body = json.dumps({"text": reply, "usage": usage})
+        await self.send_text(sender, f"DIRECTAI:{receiver}:{body}")
+        await self.send_text(receiver, f"DIRECTAI:{sender}:{body}")
+
     async def send_to(self, sender: str, receiver: str, message: str):
         await self.send_text(receiver, f"{sender}:{message}")
+        await self._handle_direct_ai(sender, receiver, message)
 
     async def broadcast(self, message: str):
         for username in list(self.connections.keys()):
