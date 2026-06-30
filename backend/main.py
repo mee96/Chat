@@ -28,8 +28,6 @@ app.add_middleware(
 
 MAX_ROOMS_PER_USER = 3
 
-YUKI_MEMBER = "Yuki"
-
 GROQ_MODEL = "llama-3.1-8b-instant"
 
 AI_SYSTEM_PROMPT = (
@@ -155,7 +153,7 @@ class ConnectionManager:
         for user in desired:
             if user in final_members:
                 continue
-            if user != YUKI_MEMBER and self._room_count(user) >= MAX_ROOMS_PER_USER:
+            if self._room_count(user) >= MAX_ROOMS_PER_USER:
                 await self.send_text(
                     user, f"SYSTEM:error:room limit reached ({MAX_ROOMS_PER_USER})"
                 )
@@ -181,8 +179,7 @@ class ConnectionManager:
                 continue
             await self.send_text(user, payload)
 
-        if YUKI_MEMBER in members:
-            await self._handle_room_ai(room_name, sender, message)
+        await self._handle_room_ai(room_name, sender, message)
 
     async def _handle_room_ai(self, room_name: str, sender: str, message: str):
         history = self._ensure_room_history(room_name)
