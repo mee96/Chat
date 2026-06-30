@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, input, signal, computed, WritableSignal, viewChild, effect, ElementRef } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AI_ROOM, AiUsage, parseAiPayload, YUKI_MEMBER } from './ai-protocol';
+import { AI_ROOM, AiUsage, parseAiPayload, YUKI_NAME } from './ai-protocol';
 import { resolveWsBase } from './ws-url';
 import { TooltipDirective } from './tooltip.directive';
 
@@ -64,7 +64,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   readonly creatingGroup = signal(false);
   readonly selectedForGroup = signal<string[]>([]);
   groupName = '';
-  addYuki = false;
   private readonly pendingRoom = signal<string | null>(null);
 
   private socket!: WebSocket;
@@ -181,6 +180,11 @@ export class ChatComponent implements OnInit, OnDestroy {
         return;
       }
 
+      if (data.startsWith('DIRECTAI:')) {
+        this.handleDirectAiMessage(data.slice('DIRECTAI:'.length));
+        return;
+      }
+
       // Direct message: sender:message
       const [sender, ...rest] = data.split(':');
       const text = rest.join(':');
@@ -280,12 +284,49 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     room.messages.update(msgs => [...msgs, {
       text: payload.text,
-      sender: YUKI_MEMBER,
+      sender: YUKI_NAME,
       time: this.getTime(),
       isMe: false,
       usage: payload.usage ?? undefined
     }]);
     room.lastMessage.set(payload.text);
+  }
+
+  // DIRECTAI:contactName:{json}  — resposta de la Yuki dins un fil 1-a-1
+  private handleDirectAiMessage(rest: string) {
+    const idx = rest.indexOf(':');
+    if (idx === -1) return;
+    const contactName = rest.slice(0, idx);
+    const json = rest.slice(idx + 1);
+
+    let payload;
+    try {
+      payload = parseAiPayload(json);
+    } catch {
+      console.warn('Invalid DIRECTAI payload', json);
+      return;
+    }
+
+    let contact = this.contacts().find(c => c.name === contactName);
+    if (!contact) {
+      contact = {
+        name: contactName,
+        initials: contactName.slice(0, 2).toUpperCase(),
+        online: true,
+        lastMessage: signal(''),
+        messages: signal<Message[]>([])
+      };
+      this.contacts.update(list => [...list, contact!]);
+    }
+
+    contact.messages.update(msgs => [...msgs, {
+      text: payload.text,
+      sender: YUKI_NAME,
+      time: this.getTime(),
+      isMe: false,
+      usage: payload.usage ?? undefined
+    }]);
+    contact.lastMessage.set(payload.text);
   }
 
   private handleAiMessage(json: string) {
@@ -301,7 +342,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.aiChat.messages.update(msgs => [...msgs, {
       text: payload.text,
-      sender: AI_ROOM,
+      sender: YUKI_NAME,
       time: this.getTime(),
       isMe: false,
       usage: payload.usage ?? undefined
@@ -364,7 +405,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!next) {
       this.selectedForGroup.set([]);
       this.groupName = '';
-      this.addYuki = false;
     }
   }
 
@@ -392,16 +432,11 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.addYuki) {
-      members.push(YUKI_MEMBER);
-    }
-
     this.socket.send(`JOIN:${name}:${members.join(',')}`);
     this.pendingRoom.set(name);
 
     this.groupName = '';
     this.selectedForGroup.set([]);
-    this.addYuki = false;
     this.creatingGroup.set(false);
   }
 

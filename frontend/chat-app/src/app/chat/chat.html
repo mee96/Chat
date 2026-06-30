@@ -12,7 +12,7 @@
           <img ngSrc="michi-avatar.png" fill alt="Yuki" class="avatar-img" />
         </div>
         <div class="contact-info">
-          <div class="contact-name">Chat amb IA</div>
+          <div class="contact-name">Yuki, la teva IA</div>
           <div class="contact-last">{{ aiChat.lastMessage() || 'parla amb la Yuki ✦' }}</div>
         </div>
       </div>
@@ -52,10 +52,6 @@
             class="chat-input"
             [(ngModel)]="groupName"
             placeholder="nom del grup..." />
-          <label class="yuki-check">
-            <input type="checkbox" [(ngModel)]="addYuki" />
-            Afegir la Yuki
-          </label>
           <button class="send-btn" [disabled]="!canCreateGroup()" (click)="createGroup()">crear ✦</button>
         </div>
       }

@@ -1,5 +1,5 @@
-export const AI_ROOM = 'Chat amb IA';
-export const YUKI_MEMBER = 'Yuki';
+export const AI_ROOM = 'Yuki, la teva IA';
+export const YUKI_NAME = 'Yuki';
 
 export interface AiUsage {
   prompt: number;

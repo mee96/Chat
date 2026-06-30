@@ -406,15 +406,6 @@ html, body {
   outline: none;
 }
 
-.yuki-check {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  color: #b3578a;
-  cursor: pointer;
-}
-
 .back-btn {
   display: none;
   background: none;
@@ -457,5 +448,9 @@ html, body {
   .back-btn {
     display: inline-flex;
     align-items: center;
+  }
+
+  .chat-input {
+    font-size: 16px;
   }
 }
