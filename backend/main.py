@@ -9,6 +9,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from groq import AsyncGroq
 
+import rag
+
 # Load backend/.env regardless of the working directory uvicorn is launched from.
 # Existing environment variables (e.g. those set by Render) take precedence.
 load_dotenv(Path(__file__).resolve().parent / ".env")
@@ -36,6 +38,13 @@ AI_SYSTEM_PROMPT = (
     "sense exagerar. Respon SEMPRE en el mateix idioma que fa servir l'usuari al "
     "seu missatge, adaptant-t'hi automàticament. Si et pregunten qui ets, presenta't "
     "com la Yuki, l'assistent del xat."
+)
+
+PDF_SYSTEM_PROMPT = (
+    "Eres un asistente experto en gramática española. Responde ÚNICAMENTE "
+    "basándote en el contexto proporcionado. Si la pregunta no tiene respuesta "
+    "en el contexto, di explícitamente que no encuentras esa información en los "
+    "libros. No inventes información."
 )
 
 _groq_client: AsyncGroq | None = None
@@ -69,6 +78,7 @@ class ConnectionManager:
         self.room_ai_histories: dict[str, list[dict]] = {}
         self.ai_histories: dict[str, list[dict]] = {}
         self.direct_ai_histories: dict[str, list[dict]] = {}
+        self.pdf_histories: dict[str, list[dict]] = {}
 
     async def connect(self, username: str, websocket: WebSocket):
         await websocket.accept()
@@ -152,6 +162,48 @@ class ConnectionManager:
         await self.send_text(
             username,
             "AI:" + json.dumps({"text": reply, "usage": usage}),
+        )
+
+    def _ensure_pdf_history(self, username: str) -> list[dict]:
+        history = self.pdf_histories.get(username)
+        if history is None:
+            history = [{"role": "system", "content": PDF_SYSTEM_PROMPT}]
+            self.pdf_histories[username] = history
+        return history
+
+    async def handle_pdf_message(self, username: str, query: str):
+        try:
+            chunks = rag.search(query)
+        except Exception:
+            logger.exception("RAG search failed for %s", username)
+            await self.send_text(
+                username,
+                "PDF:" + json.dumps(
+                    {"text": "⚠️ no s'ha pogut consultar els llibres", "usage": None}
+                ),
+            )
+            return
+        history = self._ensure_pdf_history(username)
+        context = "\n---\n".join(chunks)
+        history.append({
+            "role": "user",
+            "content": f"Contexto:\n{context}\n\nPregunta: {query}",
+        })
+        try:
+            reply, usage = await call_groq(history)
+        except Exception:
+            logger.exception("Groq PDF call failed for %s", username)
+            await self.send_text(
+                username,
+                "PDF:" + json.dumps(
+                    {"text": "⚠️ no s'ha pogut consultar els llibres", "usage": None}
+                ),
+            )
+            return
+        history.append({"role": "assistant", "content": reply})
+        await self.send_text(
+            username,
+            "PDF:" + json.dumps({"text": reply, "usage": usage}),
         )
 
     # ---- Rooms ----
@@ -257,6 +309,9 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
 
             elif data.startswith("AI:"):
                 await manager.handle_ai_message(username, data[len("AI:"):])
+
+            elif data.startswith("PDF:"):
+                await manager.handle_pdf_message(username, data[len("PDF:"):])
 
             else:
                 receiver, message = data.split(":", 1)
