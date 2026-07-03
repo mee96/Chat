@@ -1,0 +1,13 @@
+# Dependències per a la ingesta/RAG offline — NO les instal·la Render.
+# S'instal·len a part (p. ex. en local o en un worker) per processar el PDF i
+# generar/indexar embeddings. `sentence-transformers` arrossega PyTorch (pesat),
+# per això queda fora del requirements.txt del servidor.
+#
+# Ús:  pip install -r requirements-rag.txt
+# (inclou també les deps del servidor via -r, perquè la ingesta necessita
+#  qdrant-client per fer l'upsert a Qdrant.)
+
+-r requirements.txt
+
+sentence-transformers==5.6.0
+pdfplumber==0.11.10
