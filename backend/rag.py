@@ -1,54 +1,47 @@
-"""
-rag.py — Chatbot RAG amb PDF + Qdrant (infraestructura preparatòria).
+"""rag.py — Recuperació (retrieval) per al xat de gramàtica: cerca a Qdrant.
 
-BUIT DE MOMENT. Aquest mòdul contindrà la lògica de recuperació (retrieval)
-que alimentarà la Yuki amb context extret d'un PDF. Aquí sota hi ha l'estructura
-prevista del pipeline; s'implementarà més endavant.
-
-Dependències previstes: pdfplumber (extracció de text del PDF),
-sentence-transformers (embeddings), qdrant-client (base de dades vectorial).
-
-Estructura prevista
--------------------
-
-1) Configuració
-   - Nom de la col·lecció de Qdrant.
-   - Model d'embeddings (p. ex. sentence-transformers "all-MiniLM-L6-v2").
-   - Connexió al client de Qdrant (local o servidor / Qdrant Cloud).
-   - Mida del chunk i solapament (overlap).
-
-2) Càrrega del PDF
-   - Obrir el PDF amb pdfplumber i extreure el text pàgina a pàgina.
-   - Retornar el text (o una llista de (pàgina, text)) per al chunking.
-
-3) Chunking
-   - Partir el text en fragments (chunks) de mida controlada, amb solapament,
-     per no trencar el context a mig concepte.
-   - Cada chunk guardarà metadades (p. ex. número de pàgina, índex del chunk).
-
-4) Embeddings
-   - Carregar el model de sentence-transformers un sol cop (cache).
-   - Convertir cada chunk en un vector d'embedding.
-
-5) Indexat a Qdrant
-   - Crear la col·lecció si no existeix (dimensió = mida de l'embedding,
-     distància = cosinus).
-   - Fer upsert dels vectors amb el seu payload (text del chunk + metadades).
-
-6) Cerca per query (retrieval)
-   - Funció que, donada una consulta de l'usuari:
-       a) genera l'embedding de la query,
-       b) fa una cerca top-k a Qdrant,
-       c) retorna els chunks més rellevants (text + metadades + score),
-     perquè s'injectin com a context al prompt de la Yuki.
-
-Interfícies previstes (encara no implementades)
------------------------------------------------
-- load_pdf(path) -> text / llista de fragments
-- chunk_text(text, chunk_size, overlap) -> list[chunk]
-- embed(texts) -> list[vector]
-- index_chunks(chunks) -> None            # crea col·lecció + upsert
-- search(query, top_k) -> list[resultat]  # retrieval per a la Yuki
+Els embeddings (ingesta i query) usen el mateix model via fastembed (ONNX, sense
+torch), de manera que els vectors són compatibles. El client de Qdrant i el model
+s'inicialitzen de forma lazy (una sola vegada) amb QDRANT_URL/QDRANT_API_KEY del .env.
 """
 
-# TODO: implementar el pipeline descrit a dalt quan tinguem el PDF i Qdrant a punt.
+import os
+
+from fastembed import TextEmbedding
+from qdrant_client import QdrantClient
+
+COLLECTION = "gramatica"
+EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+VECTOR_SIZE = 384
+
+_model: TextEmbedding | None = None
+_client: QdrantClient | None = None
+
+
+def get_model() -> TextEmbedding:
+    global _model
+    if _model is None:
+        _model = TextEmbedding(model_name=EMBED_MODEL)
+    return _model
+
+
+def get_client() -> QdrantClient:
+    global _client
+    if _client is None:
+        _client = QdrantClient(
+            url=os.environ.get("QDRANT_URL"),
+            api_key=os.environ.get("QDRANT_API_KEY"),
+        )
+    return _client
+
+
+def embed_one(text: str) -> list[float]:
+    return list(get_model().embed([text]))[0].tolist()
+
+
+def search(query: str, top_k: int = 3) -> list[str]:
+    vector = embed_one(query)
+    result = get_client().query_points(
+        collection_name=COLLECTION, query=vector, limit=top_k
+    )
+    return [point.payload["text"] for point in result.points]
