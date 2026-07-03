@@ -16,6 +16,13 @@
           <div class="contact-last">{{ aiChat.lastMessage() || 'parla amb la Yuki ✦' }}</div>
         </div>
       </div>
+      <div class="contact pdf" [class.active]="activePdf()" (click)="selectPdf()">
+        <div class="avatar pdf">📚</div>
+        <div class="contact-info">
+          <div class="contact-name">📚 Gramàtica</div>
+          <div class="contact-last">{{ pdfChat.lastMessage() || 'pregunta sobre gramàtica ✦' }}</div>
+        </div>
+      </div>
       @for (contact of contacts(); track contact.name) {
         <div class="contact" [class.active]="contact === activeContact()" (click)="selectContact(contact)">
           <div class="avatar" [class.online]="contact.online">{{ contact.initials }}</div>

@@ -454,3 +454,16 @@ html, body {
     font-size: 16px;
   }
 }
+
+.avatar.pdf {
+  background: #cbe6c0;
+  border-color: #6aa84f;
+  color: #274d16;
+}
+
+.contact.pdf {
+  &.active {
+    background: #dcefd3;
+    border-color: #6aa84f;
+  }
+}

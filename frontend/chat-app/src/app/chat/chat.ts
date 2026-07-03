@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, input, signal, computed, WritableSignal, viewChild, effect, ElementRef } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AI_ROOM, AiUsage, parseAiPayload, YUKI_NAME } from './ai-protocol';
+import { AI_ROOM, AiUsage, parseAiPayload, YUKI_NAME, PDF_CHAT } from './ai-protocol';
 import { resolveWsBase } from './ws-url';
 import { TooltipDirective } from './tooltip.directive';
 
@@ -60,6 +60,14 @@ export class ChatComponent implements OnInit, OnDestroy {
   readonly activeAi = signal(false);
   readonly aiTyping = signal(false);
 
+  readonly pdfChat = {
+    name: PDF_CHAT,
+    messages: signal<Message[]>([]),
+    lastMessage: signal('')
+  };
+  readonly activePdf = signal(false);
+  readonly pdfTyping = signal(false);
+
   // Group creation UI state
   readonly creatingGroup = signal(false);
   readonly selectedForGroup = signal<string[]>([]);
@@ -77,6 +85,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     effect(() => {
       this.active()?.messages().length; // track the visible message list
       this.aiTyping();                  // track the "escrivint…" indicator
+      this.pdfTyping();                 // track l'indicador de gramàtica
       const el = this.messagesContainer()?.nativeElement;
       if (el) {
         // Defer until the DOM has rendered the new content.
@@ -95,7 +104,20 @@ export class ChatComponent implements OnInit, OnDestroy {
         online: true,
         isRoom: false,
         isAi: true,
+        isPdf: false,
         messages: this.aiChat.messages,
+      };
+    }
+    if (this.activePdf()) {
+      return {
+        title: this.pdfChat.name,
+        subtitle: this.pdfTyping() ? 'consultant els llibres…' : 'gramàtica espanyola ✦',
+        initials: '📚',
+        online: true,
+        isRoom: false,
+        isAi: false,
+        isPdf: true,
+        messages: this.pdfChat.messages,
       };
     }
     const c = this.activeContact();
@@ -107,6 +129,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         online: c.online,
         isRoom: false,
         isAi: false,
+        isPdf: false,
         messages: c.messages,
       };
     }
@@ -119,6 +142,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         online: false,
         isRoom: true,
         isAi: false,
+        isPdf: false,
         messages: r.messages,
       };
     }
@@ -182,6 +206,11 @@ export class ChatComponent implements OnInit, OnDestroy {
 
       if (data.startsWith('DIRECTAI:')) {
         this.handleDirectAiMessage(data.slice('DIRECTAI:'.length));
+        return;
+      }
+
+      if (data.startsWith('PDF:')) {
+        this.handlePdfMessage(data.slice('PDF:'.length));
         return;
       }
 
@@ -350,28 +379,60 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.aiChat.lastMessage.set(payload.text);
   }
 
+  private handlePdfMessage(json: string) {
+    this.pdfTyping.set(false);
+
+    let payload;
+    try {
+      payload = parseAiPayload(json);
+    } catch {
+      console.warn('Invalid PDF payload', json);
+      return;
+    }
+
+    this.pdfChat.messages.update(msgs => [...msgs, {
+      text: payload.text,
+      sender: PDF_CHAT,
+      time: this.getTime(),
+      isMe: false,
+      usage: payload.usage ?? undefined
+    }]);
+    this.pdfChat.lastMessage.set(payload.text);
+  }
+
   selectAi() {
+    this.activePdf.set(false);
     this.activeContact.set(null);
     this.activeRoom.set(null);
     this.activeAi.set(true);
   }
 
   selectContact(contact: Contact) {
+    this.activePdf.set(false);
     this.activeAi.set(false);
     this.activeRoom.set(null);
     this.activeContact.set(contact);
   }
 
   selectRoom(room: Room) {
+    this.activePdf.set(false);
     this.activeAi.set(false);
     this.activeContact.set(null);
     this.activeRoom.set(room);
   }
 
   closeConversation() {
+    this.activePdf.set(false);
     this.activeContact.set(null);
     this.activeRoom.set(null);
     this.activeAi.set(false);
+  }
+
+  selectPdf() {
+    this.activeContact.set(null);
+    this.activeRoom.set(null);
+    this.activeAi.set(false);
+    this.activePdf.set(true);
   }
 
   onUserClick(user: User) {
@@ -466,6 +527,20 @@ export class ChatComponent implements OnInit, OnDestroy {
       }]);
       this.aiChat.lastMessage.set(text);
       this.aiTyping.set(true);
+      this.newMessage = '';
+      return;
+    }
+
+    if (this.activePdf()) {
+      this.socket.send('PDF:' + text);
+      this.pdfChat.messages.update(msgs => [...msgs, {
+        text,
+        sender: this.myName(),
+        time: this.getTime(),
+        isMe: true
+      }]);
+      this.pdfChat.lastMessage.set(text);
+      this.pdfTyping.set(true);
       this.newMessage = '';
       return;
     }

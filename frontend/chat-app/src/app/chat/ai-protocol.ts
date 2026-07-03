@@ -1,5 +1,6 @@
 export const AI_ROOM = 'Yuki, la teva IA';
 export const YUKI_NAME = 'Yuki';
+export const PDF_CHAT = '📚 Gramàtica';
 
 export interface AiUsage {
   prompt: number;
