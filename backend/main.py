@@ -47,6 +47,14 @@ PDF_SYSTEM_PROMPT = (
     "libros. No inventes información."
 )
 
+# Missatge que es mostra quan falla la infraestructura (Qdrant o Groq), NO quan
+# simplement no hi ha resposta als llibres (això ho diu el propi model). En
+# castellà i amable, coherent amb la resta del chatbot de gramàtica.
+PDF_ERROR_MESSAGE = (
+    "Lo siento, ha habido un problema al consultar los libros. "
+    "Por favor, inténtalo de nuevo."
+)
+
 _groq_client: AsyncGroq | None = None
 
 
@@ -179,7 +187,7 @@ class ConnectionManager:
             await self.send_text(
                 username,
                 "PDF:" + json.dumps(
-                    {"text": "⚠️ no s'ha pogut consultar els llibres", "usage": None}
+                    {"text": PDF_ERROR_MESSAGE, "usage": None}
                 ),
             )
             return
@@ -196,7 +204,7 @@ class ConnectionManager:
             await self.send_text(
                 username,
                 "PDF:" + json.dumps(
-                    {"text": "⚠️ no s'ha pogut consultar els llibres", "usage": None}
+                    {"text": PDF_ERROR_MESSAGE, "usage": None}
                 ),
             )
             return

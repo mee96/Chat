@@ -68,6 +68,7 @@ def test_handle_pdf_message_groq_error(monkeypatch):
     assert [x["role"] for x in history] == ["system", "user"]  # sense assistant fallit
     payload = json.loads(sent[0][1][len("PDF:"):])
     assert payload["usage"] is None
+    assert payload["text"] == main.PDF_ERROR_MESSAGE
 
 
 def test_handle_pdf_message_search_error(monkeypatch):
@@ -82,3 +83,12 @@ def test_handle_pdf_message_search_error(monkeypatch):
     assert "carol" not in m.pdf_histories  # no s'ha creat historial
     payload = json.loads(sent[0][1][len("PDF:"):])
     assert payload["usage"] is None
+    assert payload["text"] == main.PDF_ERROR_MESSAGE
+
+
+def test_pdf_error_message_is_friendly_spanish():
+    # Missatge amable i en castellà (coherent amb la resta del chatbot).
+    assert main.PDF_ERROR_MESSAGE == (
+        "Lo siento, ha habido un problema al consultar los libros. "
+        "Por favor, inténtalo de nuevo."
+    )
