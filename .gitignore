@@ -1,7 +1,8 @@
 # frontend
 frontend/chat-app/node_modules/
 
-# backend
+# Backend
 backend/venv/
-backend/__pycache__/
 backend/.env
+backend/pdfs/
+backend/__pycache__/
