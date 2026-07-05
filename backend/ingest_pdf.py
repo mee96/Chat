@@ -36,28 +36,41 @@ def chunk_text(text: str, size: int = 500, overlap: int = 50) -> list[str]:
 def main() -> None:
     paths = sys.argv[1:] or sorted(glob.glob(os.path.join(PDF_DIR, "*.pdf")))
     if not paths:
-        print(f"No s'han trobat PDFs a {PDF_DIR}")
+        print(f"No s'han trobat PDFs a {PDF_DIR}", flush=True)
         return
+    print(f"PDFs a processar ({len(paths)}): {[os.path.basename(p) for p in paths]}", flush=True)
 
+    print("Carregant el model d'embeddings (la primera vegada el descarrega, ~120 MB)...", flush=True)
     model = get_model()
+    print("Model carregat.", flush=True)
+
+    print("Connectant a Qdrant...", flush=True)
     client = get_client()
     if not client.collection_exists(COLLECTION):
+        print(f"Creant la col·lecció '{COLLECTION}' (size={VECTOR_SIZE}, cosinus)...", flush=True)
         client.create_collection(
             COLLECTION,
             vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
         )
+    else:
+        print(f"La col·lecció '{COLLECTION}' ja existeix.", flush=True)
 
     point_id = 0
     total_pages = 0
     total_chunks = 0
     for path in paths:
         source = os.path.basename(path)
+        print(f"\n=== {source} ===", flush=True)
         with pdfplumber.open(path) as pdf:
+            num_pages = len(pdf.pages)
+            print(f"  {num_pages} pàgines", flush=True)
             for page_num, page in enumerate(pdf.pages, start=1):
                 total_pages += 1
                 chunks = chunk_text(page.extract_text() or "")
                 if not chunks:
+                    print(f"  pàg {page_num}/{num_pages}: 0 chunks (saltada)", flush=True)
                     continue
+                print(f"  pàg {page_num}/{num_pages}: {len(chunks)} chunks — generant embeddings...", flush=True)
                 vectors = list(model.embed(chunks))
                 points = []
                 for chunk, vec in zip(chunks, vectors):
@@ -68,10 +81,11 @@ def main() -> None:
                     ))
                     point_id += 1
                     total_chunks += 1
+                print(f"  pàg {page_num}/{num_pages}: pujant {len(points)} punts a Qdrant...", flush=True)
                 client.upsert(COLLECTION, points=points)
-        print(f"Indexat: {source}")
+        print(f"Indexat: {source} (chunks acumulats: {total_chunks})", flush=True)
 
-    print(f"Fitxers: {len(paths)} | pàgines: {total_pages} | chunks: {total_chunks}")
+    print(f"\nFet. Fitxers: {len(paths)} | pàgines: {total_pages} | chunks: {total_chunks}", flush=True)
 
 
 if __name__ == "__main__":
