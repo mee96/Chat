@@ -8,6 +8,8 @@ NO s'executa a Render. Ús:  python ingest_pdf.py [ruta1.pdf ruta2.pdf ...]
 import glob
 import os
 import sys
+import time
+import uuid
 
 import pdfplumber
 from qdrant_client.models import Distance, PointStruct, VectorParams
@@ -15,6 +17,60 @@ from qdrant_client.models import Distance, PointStruct, VectorParams
 from rag import COLLECTION, VECTOR_SIZE, get_client, get_model
 
 PDF_DIR = os.path.join(os.path.dirname(__file__), "pdfs")
+
+# Namespace fix per generar ids de punt deterministes: re-executar la ingesta
+# torna a produir els mateixos ids, així l'upsert és idempotent (sobreescriu en
+# lloc de duplicar) i es pot reprendre amb seguretat.
+_ID_NAMESPACE = uuid.UUID("6f9619ff-8b86-d011-b42d-00c04fc964ff")
+
+
+def point_id_for(source: str, page: int, chunk_idx: int) -> str:
+    """Id determinista d'un chunk a partir de (font, pàgina, índex dins la pàgina)."""
+    return str(uuid.uuid5(_ID_NAMESPACE, f"{source}#{page}#{chunk_idx}"))
+
+
+def indexed_pages(client, collection: str) -> set[tuple[str, int]]:
+    """Retorna el conjunt de (source, page) que ja tenen punts a la col·lecció.
+
+    Recorre tota la col·lecció amb scroll paginat perquè main() pugui saltar les
+    pàgines ja indexades i reprendre des d'on es va quedar.
+    """
+    done: set[tuple[str, int]] = set()
+    offset = None
+    while True:
+        records, offset = client.scroll(
+            collection_name=collection,
+            limit=1000,
+            offset=offset,
+            with_payload=True,
+            with_vectors=False,
+        )
+        for record in records:
+            done.add((record.payload["source"], record.payload["page"]))
+        if offset is None:
+            break
+    return done
+
+
+def upsert_with_retry(
+    client, collection: str, points, retries: int = 5, base_delay: float = 2.0
+) -> None:
+    """Fa upsert reintentant amb backoff exponencial davant errors transitoris
+    (p. ex. ReadTimeout de Qdrant). Reeleva l'excepció si s'esgoten els intents."""
+    for attempt in range(1, retries + 1):
+        try:
+            client.upsert(collection, points=points)
+            return
+        except Exception as exc:  # noqa: BLE001 — script offline: reintenta qualsevol error de xarxa
+            if attempt == retries:
+                raise
+            delay = base_delay * (2 ** (attempt - 1))
+            print(
+                f"    upsert ha fallat ({type(exc).__name__}: {exc}); "
+                f"reintent {attempt}/{retries - 1} d'aquí {delay:.0f}s...",
+                flush=True,
+            )
+            time.sleep(delay)
 
 
 def chunk_text(text: str, size: int = 500, overlap: int = 50) -> list[str]:
@@ -52,12 +108,15 @@ def main() -> None:
             COLLECTION,
             vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
         )
+        done = set()
     else:
-        print(f"La col·lecció '{COLLECTION}' ja existeix.", flush=True)
+        print(f"La col·lecció '{COLLECTION}' ja existeix; comprovant què ja hi ha indexat...", flush=True)
+        done = indexed_pages(client, COLLECTION)
+        print(f"  {len(done)} pàgines ja indexades (es saltaran per reprendre).", flush=True)
 
-    point_id = 0
     total_pages = 0
     total_chunks = 0
+    skipped_pages = 0
     for path in paths:
         source = os.path.basename(path)
         print(f"\n=== {source} ===", flush=True)
@@ -66,6 +125,10 @@ def main() -> None:
             print(f"  {num_pages} pàgines", flush=True)
             for page_num, page in enumerate(pdf.pages, start=1):
                 total_pages += 1
+                if (source, page_num) in done:
+                    skipped_pages += 1
+                    print(f"  pàg {page_num}/{num_pages}: ja indexada (saltada)", flush=True)
+                    continue
                 chunks = chunk_text(page.extract_text() or "")
                 if not chunks:
                     print(f"  pàg {page_num}/{num_pages}: 0 chunks (saltada)", flush=True)
@@ -73,19 +136,22 @@ def main() -> None:
                 print(f"  pàg {page_num}/{num_pages}: {len(chunks)} chunks — generant embeddings...", flush=True)
                 vectors = list(model.embed(chunks))
                 points = []
-                for chunk, vec in zip(chunks, vectors):
+                for chunk_idx, (chunk, vec) in enumerate(zip(chunks, vectors)):
                     points.append(PointStruct(
-                        id=point_id,
+                        id=point_id_for(source, page_num, chunk_idx),
                         vector=vec.tolist(),
                         payload={"text": chunk, "source": source, "page": page_num},
                     ))
-                    point_id += 1
                     total_chunks += 1
                 print(f"  pàg {page_num}/{num_pages}: pujant {len(points)} punts a Qdrant...", flush=True)
-                client.upsert(COLLECTION, points=points)
-        print(f"Indexat: {source} (chunks acumulats: {total_chunks})", flush=True)
+                upsert_with_retry(client, COLLECTION, points)
+        print(f"Indexat: {source} (chunks nous acumulats: {total_chunks})", flush=True)
 
-    print(f"\nFet. Fitxers: {len(paths)} | pàgines: {total_pages} | chunks: {total_chunks}", flush=True)
+    print(
+        f"\nFet. Fitxers: {len(paths)} | pàgines vistes: {total_pages} "
+        f"| ja indexades (saltades): {skipped_pages} | chunks nous: {total_chunks}",
+        flush=True,
+    )
 
 
 if __name__ == "__main__":

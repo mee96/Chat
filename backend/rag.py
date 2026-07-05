@@ -37,9 +37,12 @@ def get_model() -> TextEmbedding:
 def get_client() -> QdrantClient:
     global _client
     if _client is None:
+        # timeout ample (per defecte 120s) perquè els upserts grossos de la ingesta
+        # no es tallin amb ReadTimeout; configurable amb QDRANT_TIMEOUT.
         _client = QdrantClient(
             url=os.environ.get("QDRANT_URL"),
             api_key=os.environ.get("QDRANT_API_KEY"),
+            timeout=int(os.environ.get("QDRANT_TIMEOUT", "120")),
         )
     return _client
 

@@ -21,3 +21,33 @@ def test_search_returns_chunk_texts_in_order(monkeypatch):
     monkeypatch.setattr(rag, "get_client", lambda: FakeClient())
 
     assert rag.search("com es fa el plural?", top_k=3) == ["chunk A", "chunk B"]
+
+
+def test_get_client_passes_timeout_from_env(monkeypatch):
+    monkeypatch.setattr(rag, "_client", None)
+    monkeypatch.setenv("QDRANT_TIMEOUT", "77")
+    captured = {}
+
+    class FakeQdrantClient:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr(rag, "QdrantClient", FakeQdrantClient)
+
+    rag.get_client()
+    assert captured["timeout"] == 77
+
+
+def test_get_client_timeout_defaults_when_env_absent(monkeypatch):
+    monkeypatch.setattr(rag, "_client", None)
+    monkeypatch.delenv("QDRANT_TIMEOUT", raising=False)
+    captured = {}
+
+    class FakeQdrantClient:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr(rag, "QdrantClient", FakeQdrantClient)
+
+    rag.get_client()
+    assert captured["timeout"] == 120
