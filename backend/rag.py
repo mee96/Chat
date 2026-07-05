@@ -6,9 +6,18 @@ s'inicialitzen de forma lazy (una sola vegada) amb QDRANT_URL/QDRANT_API_KEY del
 """
 
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 from fastembed import TextEmbedding
 from qdrant_client import QdrantClient
+
+# Carrega backend/.env perquè get_client() trobi QDRANT_URL/QDRANT_API_KEY encara
+# que rag.py s'usi de forma independent (p. ex. des d'ingest_pdf.py, que no passa
+# per main.py). Sense això, QDRANT_URL seria None i QdrantClient cauria a
+# localhost:6333 (→ WinError 10061). Les variables ja definides a l'entorn (p. ex.
+# a Render) tenen prioritat.
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 COLLECTION = "gramatica"
 EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
