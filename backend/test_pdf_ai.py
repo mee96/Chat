@@ -24,6 +24,16 @@ def test_pdf_history_seeded_with_system_prompt():
     assert m._ensure_pdf_history("alice") is history  # idempotent
 
 
+def test_pdf_system_prompt_grounds_and_guards_outside_knowledge():
+    # Ancorat al context + frase de rebuig clara + prohibició de coneixement
+    # extern per a preguntes fora de la gramàtica (p. ex. "la capital de França").
+    # Però NO tan estricte que rebutgi gramàtica bàsica (això ho valida l'ús real).
+    prompt = main.PDF_SYSTEM_PROMPT.lower()
+    assert "contexto" in prompt
+    assert "no encuentro esa información en los libros" in prompt
+    assert "conocimiento externo" in prompt
+
+
 def test_handle_pdf_message_retrieves_context_and_sends(monkeypatch):
     m, sent = _mgr_with_capture(monkeypatch)
     monkeypatch.setattr(rag, "search", lambda q, top_k=3: ["CHUNK U", "CHUNK D"])
