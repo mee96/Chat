@@ -17,7 +17,9 @@
         </div>
       </div>
       <div class="contact pdf" [class.active]="activePdf()" (click)="selectPdf()">
-        <div class="avatar pdf">📚</div>
+        <div class="avatar pdf">
+          <img ngSrc="cat-book-avatar.jpg" fill alt="Gramàtica" class="avatar-img" />
+        </div>
         <div class="contact-info">
           <div class="contact-name">📚 Gramàtica</div>
           <div class="contact-last">{{ pdfChat.lastMessage() || 'pregunta sobre gramàtica ✦' }}</div>
@@ -86,9 +88,11 @@
       <div class="chat-header">
         <div class="chat-with">
           <button class="back-btn" type="button" aria-label="Enrere" (click)="closeConversation()">←</button>
-          <div class="avatar small" [class.online]="a.online" [class.room]="a.isRoom" [class.ai]="a.isAi">
+          <div class="avatar small" [class.online]="a.online" [class.room]="a.isRoom" [class.ai]="a.isAi" [class.pdf]="a.isPdf">
             @if (a.isAi) {
               <img ngSrc="michi-avatar.png" fill alt="Yuki" class="avatar-img" />
+            } @else if (a.isPdf) {
+              <img ngSrc="cat-book-avatar.jpg" fill alt="Gramàtica" class="avatar-img" />
             } @else {
               {{ a.initials }}
             }
