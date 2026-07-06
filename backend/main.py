@@ -158,7 +158,6 @@ class ConnectionManager:
         return history
 
     async def handle_ai_message(self, username: str, text: str):
-        logger.info("AI: branch reached — message from %s: %r", username, text)
         history = self._ensure_ai_history(username)
         history.append({"role": "user", "content": text})
         try:
