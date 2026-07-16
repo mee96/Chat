@@ -69,6 +69,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   readonly activePdf = signal(false);
   readonly pdfTyping = signal(false);
 
+  // WebSocket status — false mentre el socket està caigut / reconnectant-se.
+  readonly connected = signal(true);
+
   // Group creation UI state
   readonly creatingGroup = signal(false);
   readonly selectedForGroup = signal<string[]>([]);
@@ -171,6 +174,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.socket = new WebSocket(`${base}/ws/${this.myName()}`);
 
     this.socket.onopen = () => {
+      this.connected.set(true);
       this.reconnectAttempt = 0; // a successful connection resets the backoff
     };
 
@@ -258,7 +262,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     // reconnection it stays closed and every send fails silently (readyState is
     // no longer OPEN), so re-open it with exponential backoff. onerror is
     // always followed by onclose, so handling onclose alone is enough.
-    this.socket.onclose = () => this.scheduleReconnect();
+    this.socket.onclose = () => {
+      this.connected.set(false);
+      this.scheduleReconnect();
+    };
   }
 
   private scheduleReconnect() {

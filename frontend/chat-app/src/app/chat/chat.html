@@ -1,4 +1,9 @@
 <div class="app" [class.show-chat]="!!active()">
+  @if (!connected()) {
+    <div class="reconnect-banner" role="status" aria-live="polite">
+      <span class="reconnect-dot"></span> reconnectant…
+    </div>
+  }
   <div class="sidebar">
     <div class="sidebar-header">
       <div class="my-name">✦ {{ myName() }} ✦</div>

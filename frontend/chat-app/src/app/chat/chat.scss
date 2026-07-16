@@ -455,6 +455,38 @@ html, body {
   }
 }
 
+.reconnect-banner {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fce8b2;
+  color: #7a5c00;
+  border: 1.5px solid #e0b24a;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
+
+.reconnect-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e0a11a;
+  animation: reconnect-pulse 1s ease-in-out infinite;
+}
+
+@keyframes reconnect-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
 .avatar.pdf {
   background: #cbe6c0;
   border-color: #6aa84f;
