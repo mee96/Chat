@@ -23,6 +23,25 @@ def test_search_returns_chunk_texts_in_order(monkeypatch):
     assert rag.search("com es fa el plural?", top_k=3) == ["chunk A", "chunk B"]
 
 
+def test_search_default_top_k_is_two(monkeypatch):
+    # Menys context per petició (413 al pla gratuït de Groq).
+    monkeypatch.setattr(rag, "embed_one", lambda q: [0.0] * rag.VECTOR_SIZE)
+    captured = {}
+
+    class FakeResult:
+        points = []
+
+    class FakeClient:
+        def query_points(self, collection_name, query, limit):
+            captured["limit"] = limit
+            return FakeResult()
+
+    monkeypatch.setattr(rag, "get_client", lambda: FakeClient())
+
+    rag.search("una pregunta")
+    assert captured["limit"] == 2
+
+
 def test_get_client_passes_timeout_from_env(monkeypatch):
     monkeypatch.setattr(rag, "_client", None)
     monkeypatch.setenv("QDRANT_TIMEOUT", "77")

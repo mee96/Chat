@@ -7,6 +7,51 @@ import main
 import rag
 
 
+def test_trim_history_keeps_system_and_last_n_exchanges():
+    system = {"role": "system", "content": "S"}
+    msgs = [system]
+    for i in range(5):
+        msgs.append({"role": "user", "content": f"u{i}"})
+        msgs.append({"role": "assistant", "content": f"a{i}"})
+    trimmed = main.trim_history(msgs, 2)  # system + últimes 2 parelles
+    assert trimmed[0] is system
+    assert [m["content"] for m in trimmed[1:]] == ["u3", "a3", "u4", "a4"]
+
+
+def test_trim_history_shorter_than_limit_is_unchanged():
+    msgs = [
+        {"role": "system", "content": "S"},
+        {"role": "user", "content": "u"},
+        {"role": "assistant", "content": "a"},
+    ]
+    assert main.trim_history(msgs, 3) == msgs
+
+
+def test_trim_history_system_only():
+    msgs = [{"role": "system", "content": "S"}]
+    assert main.trim_history(msgs, 3) == msgs
+
+
+def test_handle_pdf_message_bounds_history(monkeypatch):
+    m, sent = _mgr_with_capture(monkeypatch)
+    monkeypatch.setattr(rag, "search", lambda q, top_k=2: ["CTX"])
+
+    sizes = []
+
+    async def fake_call(messages):
+        sizes.append(len(messages))
+        return "resp", {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+
+    monkeypatch.setattr(main, "call_groq", fake_call)
+
+    for i in range(10):
+        asyncio.run(m.handle_pdf_message("alice", f"pregunta {i}"))
+
+    cap = 1 + 2 * main.PDF_MAX_EXCHANGES
+    assert len(m.pdf_histories["alice"]) <= cap   # historial emmagatzemat acotat
+    assert max(sizes) <= cap                       # cada petició a Groq acotada
+
+
 def test_startup_preloads_embedding_model(monkeypatch):
     # El model s'ha de precarregar a l'arrencada (lifespan), no de forma lazy a
     # la primera petició, perquè el primer RAG no falli ni bloquegi el loop.

@@ -82,6 +82,20 @@ PDF_ERROR_MESSAGE = (
     "Por favor, inténtalo de nuevo."
 )
 
+# Nombre màxim d'intercanvis (parella pregunta/resposta) que es conserven a
+# l'historial del xat de gramàtica. Cada torn hi guarda el context del RAG, així
+# que sense límit l'historial creix i supera el límit de tokens de Groq (413).
+PDF_MAX_EXCHANGES = 3
+
+
+def trim_history(messages: list[dict], max_exchanges: int) -> list[dict]:
+    """Conserva el system prompt (primer missatge) + els últims `max_exchanges`
+    intercanvis (2*max_exchanges missatges). No modifica la llista original."""
+    if not messages:
+        return messages
+    keep = max_exchanges * 2
+    return messages[:1] + messages[1:][-keep:] if keep else messages[:1]
+
 _groq_client: AsyncGroq | None = None
 
 
@@ -223,6 +237,9 @@ class ConnectionManager:
             "role": "user",
             "content": f"Contexto:\n{context}\n\nPregunta: {query}",
         })
+        # Acota l'historial abans d'enviar-lo a Groq perquè no superi el límit
+        # de tokens (413). trim_history no muta, així que reassignem in place.
+        history[:] = trim_history(history, PDF_MAX_EXCHANGES)
         try:
             reply, usage = await call_groq(history)
         except Exception:
@@ -235,6 +252,7 @@ class ConnectionManager:
             )
             return
         history.append({"role": "assistant", "content": reply})
+        history[:] = trim_history(history, PDF_MAX_EXCHANGES)
         await self.send_text(
             username,
             "PDF:" + json.dumps({"text": reply, "usage": usage}),

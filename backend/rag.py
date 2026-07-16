@@ -68,7 +68,7 @@ def embed_one(text: str) -> list[float]:
     return list(get_model().embed([text]))[0].tolist()
 
 
-def search(query: str, top_k: int = 3) -> list[str]:
+def search(query: str, top_k: int = 2) -> list[str]:
     vector = embed_one(query)
     result = get_client().query_points(
         collection_name=COLLECTION, query=vector, limit=top_k
