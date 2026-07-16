@@ -3,6 +3,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AI_ROOM, AiUsage, parseAiPayload, YUKI_NAME, PDF_CHAT } from './ai-protocol';
 import { resolveWsBase } from './ws-url';
+import { reconnectDelay } from './ws-reconnect';
 import { TooltipDirective } from './tooltip.directive';
 
 interface Message {
@@ -75,6 +76,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   private readonly pendingRoom = signal<string | null>(null);
 
   private socket!: WebSocket;
+  private reconnectAttempt = 0;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private destroyed = false;
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLDivElement>>('messagesContainer');
 
@@ -154,12 +158,21 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.destroyed = true;
+    if (this.reconnectTimer !== null) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     this.socket?.close();
   }
 
   connectWebSocket() {
     const base = resolveWsBase(window.location.hostname);
     this.socket = new WebSocket(`${base}/ws/${this.myName()}`);
+
+    this.socket.onopen = () => {
+      this.reconnectAttempt = 0; // a successful connection resets the backoff
+    };
 
     this.socket.onmessage = (event) => {
       const data: string = event.data;
@@ -240,6 +253,22 @@ export class ChatComponent implements OnInit, OnDestroy {
       }]);
       contact.lastMessage.set(text);
     };
+
+    // Render's free tier sleeps after inactivity and drops the socket. Without
+    // reconnection it stays closed and every send fails silently (readyState is
+    // no longer OPEN), so re-open it with exponential backoff. onerror is
+    // always followed by onclose, so handling onclose alone is enough.
+    this.socket.onclose = () => this.scheduleReconnect();
+  }
+
+  private scheduleReconnect() {
+    if (this.destroyed || this.reconnectTimer !== null) return;
+    const delay = reconnectDelay(this.reconnectAttempt);
+    this.reconnectAttempt++;
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.connectWebSocket();
+    }, delay);
   }
 
   // JOIN:roomname:member1,member2,...  — server confirms room membership
