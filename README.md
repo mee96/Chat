@@ -131,6 +131,7 @@ El backend lee `backend/.env` (vía `python-dotenv`). Las variables ya definidas
 | `QDRANT_URL`      | Chat de gramática     | URL del clúster de Qdrant.                                     |
 | `QDRANT_API_KEY`  | Chat de gramática     | Clave de la API de Qdrant.                                     |
 | `QDRANT_TIMEOUT`  | *(opcional)*          | Timeout del cliente Qdrant en segundos (por defecto `120`).    |
+| `FASTEMBED_CACHE_DIR` | *(opcional)*      | Ruta de caché del modelo de embeddings (por defecto `backend/.fastembed_cache`). |
 
 `backend/.env` está en `.gitignore`: **no** se sube al repositorio.
 
@@ -168,9 +169,11 @@ El proyecto se despliega como dos servicios independientes.
 2. Configuración:
    - **Root Directory:** `backend`
    - **Runtime:** Python 3
-   - **Build Command:** `pip install -r requirements.txt`
+   - **Build Command:** `pip install -r requirements.txt && python -c "from rag import get_model; get_model()"`
    - **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
 3. En **Environment**, añade `GROQ_API_KEY`, `QDRANT_URL` y `QDRANT_API_KEY` (ver "Variables de entorno").
+
+> **Caché del modelo de embeddings:** el `python -c "..."` del Build Command **descarga el modelo durante el build** hacia `backend/.fastembed_cache/`. Como los ficheros creados en el build forman parte del deploy, quedan disponibles en runtime y **se reutilizan entre cold starts** (en vez de descargarlos de HuggingFace en cada arranque, que hacía el cold start ~50s). El servidor además **pre-carga** el modelo en el arranque (evento `lifespan` de FastAPI), así la primera pregunta al chat de gramática no falla ni se cuelga esperando la carga. La ruta es configurable con `FASTEMBED_CACHE_DIR`.
 
 > Render **no** ejecuta la ingesta: `fastembed` (búsqueda) sí está en `requirements.txt`, pero `pdfplumber` (lectura de PDFs) queda en `requirements-rag.txt`, que solo se instala en local. La colección `gramatica` debe estar ya indexada en Qdrant.
 

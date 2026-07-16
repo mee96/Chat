@@ -6,6 +6,7 @@ s'inicialitzen de forma lazy (una sola vegada) amb QDRANT_URL/QDRANT_API_KEY del
 """
 
 import os
+import threading
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -23,14 +24,26 @@ COLLECTION = "gramatica"
 EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 VECTOR_SIZE = 384
 
+# Cache local del model (dins del projecte) perquè es pugui baixar al build i
+# reutilitzar entre deploys/arrencades en comptes de baixar-lo de HuggingFace
+# cada cop. Configurable amb FASTEMBED_CACHE_DIR.
+CACHE_DIR = Path(
+    os.environ.get("FASTEMBED_CACHE_DIR", Path(__file__).resolve().parent / ".fastembed_cache")
+)
+
 _model: TextEmbedding | None = None
+_model_lock = threading.Lock()
 _client: QdrantClient | None = None
 
 
 def get_model() -> TextEmbedding:
+    # Doble comprovació amb lock: la precàrrega d'arrencada s'executa en un fil
+    # a part, així que una petició concurrent no ha de disparar una segona baixada.
     global _model
     if _model is None:
-        _model = TextEmbedding(model_name=EMBED_MODEL)
+        with _model_lock:
+            if _model is None:
+                _model = TextEmbedding(model_name=EMBED_MODEL, cache_dir=str(CACHE_DIR))
     return _model
 
 

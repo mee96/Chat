@@ -1,9 +1,11 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
+import asyncio
 import json
 import logging
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -18,7 +20,23 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Precarrega el model d'embeddings a l'arrencada (en un fil, per no bloquejar
+    # el loop) en comptes de fer-ho de forma lazy a la primera petició: així el
+    # primer xat de gramàtica no falla ni s'atura mentre es carrega el model. Amb
+    # el cache local (CACHE_DIR baixat al build) això triga segons, no ~50s.
+    try:
+        await asyncio.to_thread(rag.get_model)
+        logger.info("Embedding model preloaded.")
+    except Exception:
+        # Si falla, la resta del xat (Yuki, directes, sales) ha de seguir funcionant.
+        logger.exception("Failed to preload embedding model at startup")
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

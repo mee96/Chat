@@ -67,3 +67,19 @@ def test_get_client_does_not_force_default_port(monkeypatch):
 
     rag.get_client()
     assert captured["port"] is None
+
+
+def test_get_model_uses_local_cache_dir(monkeypatch):
+    # cache_dir apunta a una ruta local del projecte perquè el model es pugui
+    # cachejar entre deploys (es baixa al build i no cada arrencada).
+    monkeypatch.setattr(rag, "_model", None)
+    captured = {}
+
+    class FakeTextEmbedding:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr(rag, "TextEmbedding", FakeTextEmbedding)
+
+    rag.get_model()
+    assert captured["cache_dir"] == str(rag.CACHE_DIR)

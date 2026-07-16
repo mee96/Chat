@@ -1,8 +1,20 @@
 import asyncio
 import json
 
+from fastapi.testclient import TestClient
+
 import main
 import rag
+
+
+def test_startup_preloads_embedding_model(monkeypatch):
+    # El model s'ha de precarregar a l'arrencada (lifespan), no de forma lazy a
+    # la primera petició, perquè el primer RAG no falli ni bloquegi el loop.
+    calls = []
+    monkeypatch.setattr(rag, "get_model", lambda: calls.append("loaded"))
+    with TestClient(main.app):
+        pass
+    assert calls == ["loaded"]
 
 
 def _mgr_with_capture(monkeypatch):
