@@ -51,3 +51,19 @@ def test_get_client_timeout_defaults_when_env_absent(monkeypatch):
 
     rag.get_client()
     assert captured["timeout"] == 120
+
+
+def test_get_client_does_not_force_default_port(monkeypatch):
+    # Qdrant Cloud usa HTTPS (443). Passar port=None evita que el client afegeixi
+    # el :6333 per defecte quan la QDRANT_URL no porta port explícit.
+    monkeypatch.setattr(rag, "_client", None)
+    captured = {}
+
+    class FakeQdrantClient:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr(rag, "QdrantClient", FakeQdrantClient)
+
+    rag.get_client()
+    assert captured["port"] is None

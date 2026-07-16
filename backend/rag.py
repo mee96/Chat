@@ -39,9 +39,13 @@ def get_client() -> QdrantClient:
     if _client is None:
         # timeout ample (per defecte 120s) perquè els upserts grossos de la ingesta
         # no es tallin amb ReadTimeout; configurable amb QDRANT_TIMEOUT.
+        # port=None: si la QDRANT_URL no porta port, el client afegiria :6333 per
+        # defecte; amb None respecta l'HTTPS estàndard (443) del Qdrant Cloud (i
+        # si la URL sí porta port explícit, es continua respectant).
         _client = QdrantClient(
             url=os.environ.get("QDRANT_URL"),
             api_key=os.environ.get("QDRANT_API_KEY"),
+            port=None,
             timeout=int(os.environ.get("QDRANT_TIMEOUT", "120")),
         )
     return _client
