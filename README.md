@@ -65,9 +65,9 @@ Los usuarios entran con un nombre, ven quién está conectado, inician conversac
 <pre><code>Chat/
 ├── backend/
 │   ├── main.py                 # App FastAPI: WebSocket, ConnectionManager, Yuki, RAG
-│   ├── rag.py                  # Recuperación: embeddings (fastembed) + búsqueda en Qdrant
+│   ├── rag.py                  # Recuperación: embeddings (Qdrant Cloud Inference) + búsqueda en Qdrant
 │   ├── ingest_pdf.py           # Ingesta OFFLINE de los PDFs a Qdrant (no se ejecuta en Render)
-│   ├── requirements.txt        # Dependencias del servidor (incluye fastembed)
+│   ├── requirements.txt        # Dependencias del servidor
 │   ├── requirements-rag.txt    # Extra solo para la ingesta local (pdfplumber)
 │   ├── test_*.py               # Tests (pytest): Yuki, rooms, RAG, ingesta, PDF chat
 │   ├── pdfs/                   # PDFs fuente de la ingesta (ignorado en git)
