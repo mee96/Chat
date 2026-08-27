@@ -1,6 +1,14 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=a8c4f0&height=180&section=header&text=CHAT%20EN%20TIEMPO%20REAL&fontColor=1b2e4b&fontSize=32&desc=FastAPI%20%2b%20Angular%2021%20%2b%20WebSockets%20%2b%20AI%20%2b%20RAG&descSize=15&descColor=1b2e4b&descAlignY=65&fontAlignY=42" width="100%" alt="Chat Header" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=a8c4f0&height=180&section=header&text=REAL-TIME%20CHAT&fontColor=1b2e4b&fontSize=34&desc=FastAPI%20%2b%20Angular%2021%20%2b%20WebSockets%20%2b%20AI%20%2b%20RAG&descSize=16&descColor=1b2e4b&descAlignY=65&fontAlignY=42" width="100%" alt="Chat Header" />
+
+<br/>
+
+<div align="center">
+<a href="README.md"><img src="https://img.shields.io/badge/English-1b2e4b?style=flat-square" alt="English"></a>
+<a href="README.es.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-a8c4f0?style=flat-square&logoColor=1b2e4b" alt="Español"></a>
+<a href="README.ca.md"><img src="https://img.shields.io/badge/Catal%C3%A0-5b9bd5?style=flat-square" alt="Català"></a>
+</div>
 
 <br/>
 
@@ -12,13 +20,13 @@
 
 <br/>
 
-[![Demo en vivo](https://img.shields.io/badge/Demo_en_vivo-a8c4f0?style=flat-square&logoColor=1b2e4b)](https://chat-frontend-o57q.onrender.com)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-a8c4f0?style=flat-square&logoColor=1b2e4b)](https://chat-frontend-o57q.onrender.com)
 &nbsp;
-[![Backend Render](https://img.shields.io/badge/Backend_Render-5b9bd5?style=flat-square&logoColor=ffffff)](https://chat-backend-6g1r.onrender.com)
+[![Backend Render](https://img.shields.io/badge/⚙️_Backend_Render-5b9bd5?style=flat-square&logoColor=ffffff)](https://chat-backend-6g1r.onrender.com)
 &nbsp;
-[![GitHub Repo](https://img.shields.io/badge/GitHub_Repo-b8e8d4?style=flat-square&logoColor=1b2e4b)](https://github.com/mee96/Chat)
+[![GitHub Repo](https://img.shields.io/badge/🐙_GitHub_Repo-b8e8d4?style=flat-square&logoColor=1b2e4b)](https://github.com/mee96/Chat)
 &nbsp;
-[![Keep Alive Active](https://img.shields.io/badge/Keep--Alive-Active-b8e8d4?style=flat-square&logo=githubactions&logoColor=2d1b6e)](https://github.com/mee96/keep-alive)
+[![Keep Alive Active](https://img.shields.io/badge/Keep--Alive-Active-b8e8d4?style=flat-square&logo=githubactions&logoColor=1b2e4b)](https://github.com/mee96/keep-alive)
 
 </div>
 
@@ -26,254 +34,248 @@
 
 ---
 
-## <img src="https://api.iconify.design/ph/chats-teardrop-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;¿Qué es esto?
+## <img src="https://api.iconify.design/ph/question-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;What is this?
 
-Aplicación de chat en tiempo real con mensajería directa, grupos y asistente de IA, construida con un frontend en **Angular 21** y un backend en **FastAPI** comunicados mediante **WebSockets**.
+**Real-Time Chat** is a full-stack messaging app with direct conversations, group rooms and an AI assistant, built with an **Angular 21** frontend and a **FastAPI** backend talking over **WebSockets**.
 
-Los usuarios entran con un nombre, ven quién está conectado, inician conversaciones privadas y crean salas de grupo. Además pueden hablar con **Yuki**, una IA basada en **Groq**, y con **Gramàtica**, un chat de preguntas y respuestas sobre gramática española que responde **solo** a partir de tres tomos de gramática indexados con **RAG (Qdrant)**. Toda la mensajería viaja por una única conexión WebSocket por usuario.
-
-<br/>
-
-<!-- Descomenta y añade la ruta de tus capturas/GIFs cuando los tengas listos -->
-<!-- 
-<div align="center">
-  <img src="docs/assets/preview.png" alt="Vista previa del Chat" width="90%" style="border-radius: 8px;" />
-</div>
--->
+Users join with just a name, see who's online, start private conversations and create group rooms. They can also talk to **Yuki**, a **Groq**-powered AI, and to **Gramàtica**, a Spanish-grammar Q&A chat that only answers from three grammar volumes indexed with **RAG (Qdrant)**. Every message — direct, room or AI — travels over a single WebSocket connection per user.
 
 <br/>
 
 ---
 
-## <img src="https://api.iconify.design/ph/stack-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Tech Stack
+## <img src="https://api.iconify.design/ph/stack-fill.svg?color=%232FB5AE&height=24" height="22"> &nbsp;Technology Stack
 
-| Capa | Tecnología |
+| Layer | Technology |
 | :--- | :--- |
 | <img src="https://api.iconify.design/ph/desktop-tower-fill.svg?color=%235B9BD5&height=18" height="16"> **Frontend** | Angular 21 (standalone components, signals, `NgOptimizedImage`), TypeScript |
 | <img src="https://api.iconify.design/ph/cpu-fill.svg?color=%232FB5AE&height=18" height="16"> **Backend** | FastAPI, Uvicorn, `websockets` |
-| <img src="https://api.iconify.design/ph/robot-fill.svg?color=%235B9BD5&height=18" height="16"> **IA** | Groq (`AsyncGroq`, modelo `openai/gpt-oss-120b`) |
-| <img src="https://api.iconify.design/ph/database-fill.svg?color=%232FB5AE&height=18" height="16"> **RAG** | Qdrant (vector DB) + Qdrant Cloud Inference (embeddings generados en el servidor, sin cargar ningún modelo en el proceso de Render) |
-| <img src="https://api.iconify.design/ph/plugs-connected-fill.svg?color=%23E0A63B&height=18" height="16"> **Comunicación** | WebSocket (`/ws/{username}`) |
-| <img src="https://api.iconify.design/ph/rocket-launch-fill.svg?color=%235B9BD5&height=18" height="16"> **Deploy** | Render (frontend como Static Site, backend como Web Service) |
+| <img src="https://api.iconify.design/ph/robot-fill.svg?color=%235B9BD5&height=18" height="16"> **AI** | Groq (`AsyncGroq`, model `openai/gpt-oss-120b`) |
+| <img src="https://api.iconify.design/ph/database-fill.svg?color=%232FB5AE&height=18" height="16"> **RAG** | Qdrant (vector DB) + Qdrant Cloud Inference (embeddings generated server-side — the backend process never loads a model itself) |
+| <img src="https://api.iconify.design/ph/plugs-connected-fill.svg?color=%23E0A63B&height=18" height="16"> **Communication** | WebSocket (`/ws/{username}`) |
+| <img src="https://api.iconify.design/ph/rocket-launch-fill.svg?color=%235B9BD5&height=18" height="16"> **Deploy** | Render (frontend as Static Site, backend as Web Service) |
 
 <br/>
 
 ---
 
-## <img src="https://api.iconify.design/ph/folder-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Estructura del Proyecto
+## <img src="https://api.iconify.design/ph/arrows-left-right-bold.svg?color=%235B9BD5&height=24" height="22"> &nbsp;WebSocket Protocol
+
+Messages are plain text with prefixes. AI replies carry a JSON body `{text, usage}`, where `usage` is `{prompt_tokens, completion_tokens, total_tokens}` or `null` when it doesn't apply.
+
+### <img src="https://api.iconify.design/ph/arrow-up-fill.svg?color=%232FB5AE&height=20" height="18"> Client → Server
+<pre><code>receiver:text                     → Direct message to another user
+JOIN:room:member1,member2         → Create / join a room
+ROOM:room:text                    → Message to a room
+AI:text                           → Message to Yuki's dedicated chat
+PDF:text                          → Question to the grammar chat (RAG)</code></pre>
+
+### <img src="https://api.iconify.design/ph/arrow-down-fill.svg?color=%23E0A63B&height=20" height="18"> Server → Client
+<pre><code>SYSTEM:users:user1,user2          → Connected user list
+SYSTEM:error:...                  → Error (e.g. room limit reached)
+JOIN:room:member1,member2         → Room membership confirmation
+ROOM:room:sender:text             → Incoming room message
+AI:{json}                         → Yuki's reply (dedicated chat)
+DIRECTAI:contact:{json}           → Yuki's reply in a 1-to-1 chat (via `@yuki`)
+ROOMAI:room:{json}                → Yuki's reply in a room (via `@yuki`)
+PDF:{json}                        → Grammar chat reply</code></pre>
+
+> **`@yuki` in any conversation:** in 1-to-1 chats and rooms, Yuki only replies when a message contains `@yuki`. In her dedicated *"Yuki, la teva IA"* chat, she replies to every message without needing a mention.
+
+<br/>
+
+---
+
+## <img src="https://api.iconify.design/ph/folder-fill.svg?color=%232FB5AE&height=24" height="22"> &nbsp;Project Structure
 
 <pre><code>Chat/
-├── backend/
-│   ├── main.py                 # App FastAPI: WebSocket, ConnectionManager, Yuki, RAG
-│   ├── rag.py                  # Recuperación: embeddings (Qdrant Cloud Inference) + búsqueda en Qdrant
-│   ├── ingest_pdf.py           # Ingesta OFFLINE de los PDFs a Qdrant (no se ejecuta en Render)
-│   ├── requirements.txt        # Dependencias del servidor
-│   ├── requirements-rag.txt    # Extra solo para la ingesta local (pdfplumber)
-│   ├── test_*.py               # Tests (pytest): Yuki, rooms, RAG, ingesta, PDF chat
-│   ├── pdfs/                   # PDFs fuente de la ingesta (ignorado en git)
-│   ├── .env                    # Claves: GROQ/QDRANT (ignorado en git)
-│   └── venv/                   # Entorno virtual de Python (ignorado en git)
+├── 🐍 backend/
+│   ├── main.py                 → FastAPI app: WebSocket, ConnectionManager, Yuki, RAG
+│   ├── rag.py                  → Retrieval: embeddings (Qdrant Cloud Inference) + Qdrant search
+│   ├── ingest_pdf.py           → OFFLINE ingestion of the PDFs into Qdrant (not run on Render)
+│   ├── requirements.txt        → Server dependencies
+│   ├── requirements-rag.txt    → Extra dependency for local ingestion only (pdfplumber)
+│   ├── test_*.py               → Tests (pytest): Yuki, rooms, RAG, ingestion, grammar chat
+│   ├── pdfs/                   → Source PDFs for ingestion (gitignored)
+│   ├── .env                    → Keys: GROQ/QDRANT (gitignored)
+│   └── venv/                   → Python virtual environment (gitignored)
 │
-└── frontend/
-    └── chat-app/               # Proyecto Angular
+└── 🅰️ frontend/
+    └── chat-app/                → Angular project
         ├── src/app/
-        │   ├── login/          # Pantalla de entrada (elegir nombre de usuario)
-        │   ├── chat/           # Vista principal del chat
-        │   │   ├── chat.ts/.html/.scss   # Contactos, salas, Yuki, Gramàtica, responsive
-        │   │   ├── ai-protocol.ts        # Parseo de payloads de IA (texto + tokens)
-        │   │   ├── ws-url.ts             # Resuelve el backend (local vs Render)
-        │   │   └── tooltip.directive.ts  # Tooltip para los tokens
-        │   ├── app.ts          # Componente raíz
+        │   ├── login/           → Entry screen (choose a username)
+        │   ├── chat/            → Main chat view
+        │   │   ├── chat.ts/.html/.scss   → Contacts, rooms, Yuki, Gramàtica, responsive layout
+        │   │   ├── ai-protocol.ts        → Parses AI payloads (text + tokens)
+        │   │   ├── ws-url.ts             → Resolves the backend (local vs Render)
+        │   │   └── tooltip.directive.ts  → Tooltip for token counts
+        │   ├── app.ts           → Root component
         │   └── app.config.ts
         ├── angular.json
         └── package.json</code></pre>
 
-El backend mantiene **en memoria**:
+The backend keeps in **memory**:
 
-* `connections`: mapa `username → WebSocket` de los usuarios conectados.
-* `rooms`: mapa `nombre_sala → [miembros]`, con un límite de **3 salas por usuario** (`MAX_ROOMS_PER_USER`).
-* Historiales de conversación con la IA (todos con su *system prompt* inicial):
-  * `ai_histories` — chat dedicado con Yuki, **por usuario**.
-  * `direct_ai_histories` — menciones `@yuki` en chats 1 a 1, **por pareja**.
-  * `room_ai_histories` — menciones `@yuki` en salas, **por sala**.
-  * `pdf_histories` — chat de gramática (RAG), **por usuario**.
-
-<br/>
-
-### <img src="https://api.iconify.design/ph/arrows-left-right-bold.svg?color=%232FB5AE&height=20" height="18"> Protocolo de mensajes (WebSocket)
-
-Los mensajes son texto plano con prefijos. Las respuestas de IA llevan un cuerpo JSON `{text, usage}`, donde `usage` es `{prompt_tokens, completion_tokens, total_tokens}` o `null` si no aplica.
-
-| Mensaje | Dirección | Significado |
-| :--- | :--- | :--- |
-| `receptor:texto` | cliente → server | Mensaje directo a otro usuario |
-| `JOIN:sala:miembro1,miembro2` | cliente → server | Crear / unirse a una sala |
-| `ROOM:sala:texto` | cliente → server | Mensaje a una sala |
-| `AI:texto` | cliente → server | Mensaje al chat dedicado de Yuki |
-| `PDF:texto` | cliente → server | Pregunta al chat de gramática (RAG) |
-| `SYSTEM:users:user1,user2` | server → cliente | Lista de usuarios conectados |
-| `SYSTEM:error:...` | server → cliente | Error (p. ej. límite de salas alcanzado) |
-| `JOIN:sala:miembro1,miembro2` | server → cliente | Confirmación de membresía de sala |
-| `ROOM:sala:emisor:texto` | server → cliente | Mensaje entrante de una sala |
-| `AI:{json}` | server → cliente | Respuesta de Yuki (chat dedicated) |
-| `DIRECTAI:contacto:{json}` | server → cliente | Respuesta de Yuki en un chat 1 a 1 (por `@yuki`) |
-| `ROOMAI:sala:{json}` | server → cliente | Respuesta de Yuki en una sala (por `@yuki`) |
-| `PDF:{json}` | server → cliente | Respuesta del chat de gramática |
-
-> **`@yuki` en cualquier conversación:** en los chats 1 a 1 y en las salas, Yuki solo responde cuando el mensaje contiene `@yuki`. En el chat dedicado *"Yuki, la teva IA"* responde a todos los mensajes sin necesidad de mencionarla.
+* `connections`: a `username → WebSocket` map of connected users.
+* `rooms`: a `room_name → [members]` map, capped at **3 rooms per user** (`MAX_ROOMS_PER_USER`).
+* AI conversation histories (each seeded with its system prompt):
+  * `ai_histories` — Yuki's dedicated chat, **per user**.
+  * `direct_ai_histories` — `@yuki` mentions in 1-to-1 chats, **per pair**.
+  * `room_ai_histories` — `@yuki` mentions in rooms, **per room**.
+  * `pdf_histories` — the grammar chat (RAG), **per user**.
 
 <br/>
 
 ---
 
-## <img src="https://api.iconify.design/ph/play-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Ejecutar en Local
+## <img src="https://api.iconify.design/ph/play-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Run Locally
 
-Necesitas **Python 3.11+** y **Node.js 20+** (con npm).
+You'll need **Python 3.11+** and **Node.js 20+** (with npm).
 
 ### 1. Backend (FastAPI)
 
 <pre><code>cd backend
 
-# Crear y activar el entorno virtual
+# Create and activate the virtual environment
 python -m venv venv
 # Windows (PowerShell):
 venv\Scripts\Activate.ps1
 # Linux/macOS:
 source venv/bin/activate
 
-# Instalar dependencias del servidor
+# Install server dependencies
 pip install -r requirements.txt
 
-# Crear backend/.env con las claves (ver "Variables de entorno")
-# Arrancar el servidor (puerto 8000)
+# Create backend/.env with your keys (see "Environment Variables")
+# Start the server (port 8000)
 uvicorn main:app --reload</code></pre>
 
-El backend quedará disponible en `http://localhost:8000` y el WebSocket en `ws://localhost:8000/ws/{username}`.
+The backend will be available at `http://localhost:8000` and the WebSocket at `ws://localhost:8000/ws/{username}`.
 
-> El CORS del backend permite por defecto el origen `http://localhost:4200` (el dev server de Angular).
+> ⚡ **Availability:** the production backend on Render stays active without *cold starts*, thanks to automatic pings from [Keep-Alive](https://github.com/mee96/keep-alive).
+
+> The backend's CORS allows `http://localhost:4200` (Angular's dev server) by default.
 
 ### 2. Frontend (Angular)
 
 <pre><code>cd frontend/chat-app
 
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Arrancar el dev server (puerto 4200)
+# Start the dev server (port 4200)
 npm start</code></pre>
 
-Abre `http://localhost:4200` en el navegador.
+Open `http://localhost:4200` in your browser. ✨
 
-> **URL del WebSocket:** [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts) la resuelve automáticamente — si la página se sirve desde `localhost`/`127.0.0.1` apunta a `ws://localhost:8000`; en cualquier otro dominio, al backend de Render (`wss://chat-backend-6g1r.onrender.com`). No hace falta editar nada para el desarrollo local.
+> **WebSocket URL:** [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts) resolves it automatically — served from `localhost`/`127.0.0.1`, it points to `ws://localhost:8000`; from any other domain, to the Render backend (`wss://chat-backend-6g1r.onrender.com`). Nothing to edit for local development.
 
 <br/>
 
 ---
 
-## <img src="https://api.iconify.design/ph/sliders-horizontal-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Variables de entorno
+## <img src="https://api.iconify.design/ph/sliders-horizontal-fill.svg?color=%23E0A63B&height=24" height="22"> &nbsp;Environment Variables
 
-El backend lee `backend/.env` (vía `python-dotenv`). Las variables ya definidas en el entorno (p. ej. en Render) tienen prioridad. En **Render** hay que configurarlas en el panel del servicio.
+The backend reads `backend/.env` (via `python-dotenv`). Variables already set in the environment (e.g. on Render) take priority. On **Render**, configure them in the service's panel.
 
-| Variable | Necesaria para | Descripción |
+| Variable | Needed for | Description |
 | :--- | :--- | :--- |
-| `GROQ_API_KEY` | Yuki (IA) | Clave de la API de Groq. |
-| `QDRANT_URL` | Chat de gramática | URL del clúster de Qdrant. |
-| `QDRANT_API_KEY` | Chat de gramática | Clave de la API de Qdrant. |
-| `QDRANT_TIMEOUT` | *(opcional)* | Timeout del cliente Qdrant en segundos (por defecto `120`). |
+| `GROQ_API_KEY` | Yuki (AI) | Groq API key. |
+| `QDRANT_URL` | Grammar chat | URL of the Qdrant cluster. |
+| `QDRANT_API_KEY` | Grammar chat | Qdrant API key. |
+| `QDRANT_TIMEOUT` | *(optional)* | Qdrant client timeout in seconds (defaults to `120`). |
 
-`backend/.env` está en `.gitignore`: **no** se sube al repositorio.
+`backend/.env` is in `.gitignore`: it is **not** pushed to the repository.
 
 <br/>
 
 ---
 
-## <img src="https://api.iconify.design/ph/book-open-text-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Ingesta de los PDFs (RAG)
+## <img src="https://api.iconify.design/ph/book-open-text-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;PDF Ingestion (RAG)
 
-El chat **Gramàtica** responde solo a partir de tres tomos de *Gramática descriptiva de la lengua española* (volúmenes 1, 2 y 3), troceados e indexados en Qdrant. La ingesta se ejecuta **una vez en local** (no en Render): sube los chunks a Qdrant, que genera los vectores en el servidor (Cloud Inference).
+The **Gramàtica** chat answers solely from three volumes of *Gramática descriptiva de la lengua española* (volumes 1, 2 and 3), chunked and indexed in Qdrant. Ingestion runs **once, locally** (not on Render): it uploads the chunks to Qdrant, which generates the vectors server-side (Cloud Inference).
 
-* **Modelo de embeddings:** `intfloat/multilingual-e5-small` (384 dims, distancia coseno), vía **Qdrant Cloud Inference** — el proceso nunca carga un modelo en local, evitando el OOM del plan gratuito de Render (512Mi). Al pertenecer a la familia E5, los textos se envían con los prefijos `"query: "`/`"passage: "` añadidos manualmente (Qdrant Cloud Inference aún no los aplica automáticamente).
-* **Colección:** `gramatica`.
-* **Troceado:** ~500 palabras por *chunk* con 50 de solapamiento.
+* **Embedding model:** `intfloat/multilingual-e5-small` (384 dims, cosine distance), via **Qdrant Cloud Inference** — the backend process never loads a model locally, avoiding the OOM crashes that a locally-loaded model caused on Render's free tier (512Mi). As an E5-family model, the `"query: "`/`"passage: "` prefixes it expects are added manually (Qdrant Cloud Inference doesn't apply them automatically yet).
+* **Collection:** `gramatica`.
+* **Chunking:** ~500 words per chunk with 50 words of overlap. Bibliography/reference pages are skipped — they never contain grammar explanations and can otherwise outrank real content in the retrieval.
 
-Pasos:
+Steps:
 
 <pre><code>cd backend
-# (con el venv activado y backend/.env configurado)
+# (with the venv activated and backend/.env configured)
 
-# Dependencia extra solo para leer los PDFs
+# Extra dependency, only needed to read the PDFs
 pip install -r requirements-rag.txt
 
-# Coloca los PDFs en backend/pdfs/ y lanza la ingesta
+# Place the PDFs in backend/pdfs/ and launch the ingestion
 python ingest_pdf.py
-# o rutas concretas: python ingest_pdf.py ruta/a/tomo1.pdf ruta/a/tomo2.pdf</code></pre>
+# or specific paths: python ingest_pdf.py path/to/volume1.pdf path/to/volume2.pdf</code></pre>
 
-La ingesta es **reanudable**: usa IDs deterministas (idempotentes) y salta las páginas ya indexadas, así que si se corta (timeout de red, etc.) basta con volver a ejecutarla y continúa donde estaba. Los *upserts* reintentan automáticamente con *backoff* ante errores transitorios.
+Ingestion is **resumable**: it uses deterministic (idempotent) IDs and skips pages already indexed, so if it's interrupted (network timeout, etc.) simply re-running it picks up where it left off. Upserts retry automatically with backoff on transient errors.
 
 <br/>
 
 ---
 
-## <img src="https://api.iconify.design/ph/cloud-arrow-up-fill.svg?color=%232FB5AE&height=24" height="22"> &nbsp;Despliegue y Alta Disponibilidad
+## <img src="https://api.iconify.design/ph/cloud-arrow-up-fill.svg?color=%232FB5AE&height=24" height="22"> &nbsp;Deployment & High Availability
 
-El proyecto se despliega como dos servicios independientes en Render.
+The project deploys as two independent services on Render.
 
 ### Backend — Web Service
 
-1. En el panel de Render: **New → Web Service** y conecta el repositorio.
-2. Configuración:
+1. In the Render dashboard: **New → Web Service** and connect the repository.
+2. Configuration:
    * **Root Directory:** `backend`
    * **Runtime:** Python 3
-   * **Build Command:** `pip install -r requirements.txt && python -c "from rag import get_model; get_model()"`
+   * **Build Command:** `pip install -r requirements.txt`
    * **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
-3. En **Environment**, añade `GROQ_API_KEY`, `QDRANT_URL` y `QDRANT_API_KEY` (ver "Variables de entorno").
+3. Under **Environment**, add `GROQ_API_KEY`, `QDRANT_URL` and `QDRANT_API_KEY` (see "Environment Variables").
 
-> **Caché del modelo de embeddings:** el `python -c "..."` del Build Command **descarga el modelo durante el build** hacia `backend/.fastembed_cache/`. Como los ficheros creados en el build forman parte del deploy, quedan disponibles en runtime y **se reutilizan entre cold starts** (en vez de descargarlos de HuggingFace en cada arranque, que hacía el cold start ~50s). El servidor además **pre-carga** el modelo en el arranque (evento `lifespan` de FastAPI), así la primera pregunta al chat de gramática no falla ni se cuelga esperando la carga. La ruta es configurable con `FASTEMBED_CACHE_DIR`.
+> Render does **not** run the ingestion: `pdfplumber` (PDF reading) lives in `requirements-rag.txt`, installed locally only. The `gramatica` collection must already be indexed in Qdrant. Since embeddings are generated server-side by Qdrant Cloud Inference, the backend itself never loads an embedding model — nothing to download or cache during the build.
 
-> Render **no** ejecuta la ingesta: `fastembed` (búsqueda) sí está en `requirements.txt`, pero `pdfplumber` (lectura de PDFs) queda en `requirements-rag.txt`, que solo se instala en local. La colección `gramatica` debe estar ya indexada en Qdrant.
-
-Render expone el servicio sobre HTTPS, por lo que el WebSocket se conecta vía `wss://`.
+Render serves the service over HTTPS, so the WebSocket connects via `wss://`.
 
 ### Frontend — Static Site
 
-1. **New → Static Site** y conecta el mismo repositorio.
-2. Configuración:
+1. **New → Static Site** and connect the same repository.
+2. Configuration:
    * **Root Directory:** `frontend/chat-app`
    * **Build Command:** `npm install && npm run build`
    * **Publish Directory:** `dist/chat-app/browser`
-3. La URL del backend se resuelve sola en [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts); si cambia el dominio del backend, actualiza `PROD_WS_BASE` ahí.
+3. The backend URL resolves itself in [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts); if the backend's domain changes, update `PROD_WS_BASE` there.
 
-> ⚡ **Disponibilidad sin Cold Starts:** El backend en Render se mantiene constantemente en caliente gracias a un bot de automatización vía GitHub Actions configurado en mi repositorio centralizado [**keep-alive**](https://github.com/mee96/keep-alive), el cual envía pings periódicos a los endpoints correspondientes.
-
-<br/>
-
----
-
-## <img src="https://api.iconify.design/ph/sparkle-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Funcionalidades actuales
-
-* **Entrada por nombre de usuario** — sin contraseña; cada usuario abre su propia conexión WebSocket.
-* **Lista de usuarios en línea** — actualizada dinámicamente al conectarse/desconectarse usuarios.
-* **Mensajería directa** — chat privado 1 a 1 entre usuarios conectados.
-* **Salas de grupo** — crear grupos con nombre seleccionando varios usuarios; mensajes difundidos a todos los miembros.
-* **Límite de salas** — máximo de 3 salas por usuario, controlado por el servidor.
-* **Re-sincronización de salas** — al reconectar, el usuario recupera las salas a las que pertenece.
-* **Yuki, la IA del chat** — asistente basado en Groq (`openai/gpt-oss-120b`), que responde en el idioma del usuario y mantiene **historial por usuario**. Cada respuesta muestra los **tokens** consumidos, con un **tooltip** al pasar por encima (prompt · respuesta · total).
-* **`@yuki` en todas las conversaciones** — menciona `@yuki` en un chat 1 a 1 o en una sala y responde ahí mismo para todos los participantes; además tiene su propio chat dedicado.
-* **Chat de Gramática (RAG)** — el chat *"Gramàtica"* responde **solo** con el contenido de los tres tomos de gramática indexados en Qdrant; si la pregunta se sale del contexto, lo dice en vez de inventar.
-* **Diseño responsive (móvil)** — patrón tipo Messenger/WhatsApp: en pantallas estrechas (≤ 768 px) se ve primero la lista de chats y, al abrir una conversación, esta ocupa toda la pantalla con un botón de "atrás".
-* **UI reactiva con signals** — Angular 21 con componentes standalone y estado basado en signals.
+> ⚡ **No Cold Starts:** the backend on Render is kept constantly warm thanks to an automation bot running on GitHub Actions in my centralized [**keep-alive**](https://github.com/mee96/keep-alive) repository, which sends periodic pings to the relevant endpoints.
 
 <br/>
 
 ---
 
-## <img src="https://api.iconify.design/ph/warning-circle-fill.svg?color=%23E0A63B&height=24" height="22"> &nbsp;Limitaciones conocidas
+## <img src="https://api.iconify.design/ph/sparkle-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Key Features
 
-* El estado (usuarios, salas e **historiales de IA**) se guarda **en memoria**: se pierde al reiniciar el backend.
-* No hay persistencia del historial de mensajes ni base de datos (más allá de los vectores de gramática en Qdrant).
-* La autenticación es nominal (solo nombre de usuario, sin verificación).
-* El chat de gramática depende de una **ingesta previa** de los PDFs a Qdrant (paso manual en local) y de que `GROQ_API_KEY`/`QDRANT_URL`/`QDRANT_API_KEY` estén configuradas.
-* Con la capa gratuita de Groq/Qdrant puede haber **límites de tasa** (respuestas más lentas o reintentos).
-* El dominio del backend de producción está fijado como constante en [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts) (`PROD_WS_BASE`).
+* <img src="https://api.iconify.design/ph/user-fill.svg?color=%235B9BD5&height=18" height="16"> **Username-only entry** — no password; each user opens their own WebSocket connection.
+* <img src="https://api.iconify.design/ph/users-fill.svg?color=%232FB5AE&height=18" height="16"> **Live user list** — updates dynamically as users connect and disconnect.
+* <img src="https://api.iconify.design/ph/chat-circle-dots-fill.svg?color=%23E0A63B&height=18" height="16"> **Direct messaging** — private 1-to-1 chat between connected users.
+* <img src="https://api.iconify.design/ph/users-three-fill.svg?color=%235B9BD5&height=18" height="16"> **Group rooms** — create a named group by picking several users; messages broadcast to every member.
+* <img src="https://api.iconify.design/ph/hash-fill.svg?color=%232FB5AE&height=18" height="16"> **Room limit** — a maximum of 3 rooms per user, enforced server-side.
+* <img src="https://api.iconify.design/ph/arrows-clockwise-fill.svg?color=%23E0A63B&height=18" height="16"> **Room re-sync** — on reconnect, a user recovers every room they belong to.
+* <img src="https://api.iconify.design/ph/robot-fill.svg?color=%235B9BD5&height=18" height="16"> **Yuki, the chat's AI** — a Groq-powered assistant (`openai/gpt-oss-120b`) that replies in the user's own language and keeps a **per-user history**. Every reply shows its **token usage**, with a hover **tooltip** (prompt · completion · total).
+* <img src="https://api.iconify.design/ph/at-fill.svg?color=%232FB5AE&height=18" height="16"> **`@yuki` anywhere** — mention `@yuki` in a 1-to-1 chat or a room and she replies right there, visible to everyone in it; she also has her own dedicated chat.
+* <img src="https://api.iconify.design/ph/book-open-text-fill.svg?color=%23E0A63B&height=18" height="16"> **Grammar Chat (RAG)** — the *"Gramàtica"* chat answers **only** from the three grammar volumes indexed in Qdrant; if a question falls outside that context, it says so instead of making something up.
+* <img src="https://api.iconify.design/ph/device-mobile-fill.svg?color=%235B9BD5&height=18" height="16"> **Responsive design (mobile)** — a Messenger/WhatsApp-style pattern: on narrow screens (≤ 768px) the chat list shows first, and opening a conversation takes over the full screen with a "back" button.
+* <img src="https://api.iconify.design/ph/lightning-fill.svg?color=%232FB5AE&height=18" height="16"> **Reactive UI with signals** — Angular 21 with standalone components and signal-based state.
+
+<br/>
+
+---
+
+## <img src="https://api.iconify.design/ph/warning-circle-fill.svg?color=%23E0A63B&height=24" height="22"> &nbsp;Known Limitations
+
+* State (users, rooms and **AI histories**) is kept **in memory**: it's lost on every backend restart.
+* No message-history persistence and no database beyond the grammar vectors in Qdrant.
+* Authentication is nominal (username only, no verification).
+* The grammar chat depends on a **prior ingestion** of the PDFs into Qdrant (a manual, local step) and on `GROQ_API_KEY`/`QDRANT_URL`/`QDRANT_API_KEY` being configured.
+* Groq/Qdrant's free tiers can impose **rate limits** (slower replies or retries).
+* The production backend's domain is hardcoded as a constant in [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts) (`PROD_WS_BASE`).
 
 <br/>
 
@@ -281,8 +283,10 @@ Render expone el servicio sobre HTTPS, por lo que el WebSocket se conecta vía `
 
 <div align="center">
 
-Desenvolupat per **Carme Medina Canalda**  
+Developed by **Carme Medina Canalda**
 *Full Stack Developer · Barcelona*
+
+<br/>
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-a8c4f0?style=flat-square&logo=linkedin&logoColor=1b2e4b)](https://www.linkedin.com/in/carme-medina-canalda-250457132/)
 [![Portfolio](https://img.shields.io/badge/Portfolio-5b9bd5?style=flat-square&logoColor=ffffff)](https://carme-portfoli.onrender.com/)
