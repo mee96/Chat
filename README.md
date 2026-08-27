@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=a8c4f0&height=180&section=header&text=CHAT%20EN%20TIEMPO%20REAL&fontColor=1b2e4b&fontSize=32&desc=FastAPI%20%2b%20Angular%2021%20%2b%20WebSockets%20%2b%20%20AI%20%2b%20RAG&descSize=15&descColor=1b2e4b&descAlignY=65&fontAlignY=42" width="100%" alt="Chat Header" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=a8c4f0&height=180&section=header&text=CHAT%20EN%20TIEMPO%20REAL&fontColor=1b2e4b&fontSize=32&desc=FastAPI%20%2b%20Angular%2021%20%2b%20WebSockets%20%2b%20AI%20%2b%20RAG&descSize=15&descColor=1b2e4b&descAlignY=65&fontAlignY=42" width="100%" alt="Chat Header" />
 
 <br/>
 
@@ -17,6 +17,8 @@
 [![Backend Render](https://img.shields.io/badge/Backend_Render-5b9bd5?style=flat-square&logoColor=ffffff)](https://chat-backend-6g1r.onrender.com)
 &nbsp;
 [![GitHub Repo](https://img.shields.io/badge/GitHub_Repo-b8e8d4?style=flat-square&logoColor=1b2e4b)](https://github.com/mee96/Chat)
+&nbsp;
+[![Keep Alive Active](https://img.shields.io/badge/Keep--Alive-Active-b8e8d4?style=flat-square&logo=githubactions&logoColor=2d1b6e)](https://github.com/mee96/keep-alive)
 
 </div>
 
@@ -29,6 +31,15 @@
 Aplicación de chat en tiempo real con mensajería directa, grupos y asistente de IA, construida con un frontend en **Angular 21** y un backend en **FastAPI** comunicados mediante **WebSockets**.
 
 Los usuarios entran con un nombre, ven quién está conectado, inician conversaciones privadas y crean salas de grupo. Además pueden hablar con **Yuki**, una IA basada en **Groq**, y con **Gramàtica**, un chat de preguntas y respuestas sobre gramática española que responde **solo** a partir de tres tomos de gramática indexados con **RAG (Qdrant)**. Toda la mensajería viaja por una única conexión WebSocket por usuario.
+
+<br/>
+
+<!-- Descomenta y añade la ruta de tus capturas/GIFs cuando los tengas listos -->
+<!-- 
+<div align="center">
+  <img src="docs/assets/preview.png" alt="Vista previa del Chat" width="90%" style="border-radius: 8px;" />
+</div>
+-->
 
 <br/>
 
@@ -53,26 +64,26 @@ Los usuarios entran con un nombre, ven quién está conectado, inician conversac
 
 <pre><code>Chat/
 ├── backend/
-│   ├── main.py                # App FastAPI: WebSocket, ConnectionManager, Yuki, RAG
-│   ├── rag.py                 # Recuperación: embeddings (fastembed) + búsqueda en Qdrant
-│   ├── ingest_pdf.py          # Ingesta OFFLINE de los PDFs a Qdrant (no se ejecuta en Render)
-│   ├── requirements.txt       # Dependencias del servidor (incluye fastembed)
-│   ├── requirements-rag.txt   # Extra solo para la ingesta local (pdfplumber)
-│   ├── test_*.py              # Tests (pytest): Yuki, rooms, RAG, ingesta, PDF chat
-│   ├── pdfs/                  # PDFs fuente de la ingesta (ignorado en git)
-│   ├── .env                   # Claves: GROQ/QDRANT (ignorado en git)
-│   └── venv/                  # Entorno virtual de Python (ignorado en git)
+│   ├── main.py                 # App FastAPI: WebSocket, ConnectionManager, Yuki, RAG
+│   ├── rag.py                  # Recuperación: embeddings (fastembed) + búsqueda en Qdrant
+│   ├── ingest_pdf.py           # Ingesta OFFLINE de los PDFs a Qdrant (no se ejecuta en Render)
+│   ├── requirements.txt        # Dependencias del servidor (incluye fastembed)
+│   ├── requirements-rag.txt    # Extra solo para la ingesta local (pdfplumber)
+│   ├── test_*.py               # Tests (pytest): Yuki, rooms, RAG, ingesta, PDF chat
+│   ├── pdfs/                   # PDFs fuente de la ingesta (ignorado en git)
+│   ├── .env                    # Claves: GROQ/QDRANT (ignorado en git)
+│   └── venv/                   # Entorno virtual de Python (ignorado en git)
 │
 └── frontend/
-    └── chat-app/              # Proyecto Angular
+    └── chat-app/               # Proyecto Angular
         ├── src/app/
-        │   ├── login/         # Pantalla de entrada (elegir nombre de usuario)
-        │   ├── chat/          # Vista principal del chat
+        │   ├── login/          # Pantalla de entrada (elegir nombre de usuario)
+        │   ├── chat/           # Vista principal del chat
         │   │   ├── chat.ts/.html/.scss   # Contactos, salas, Yuki, Gramàtica, responsive
         │   │   ├── ai-protocol.ts        # Parseo de payloads de IA (texto + tokens)
         │   │   ├── ws-url.ts             # Resuelve el backend (local vs Render)
         │   │   └── tooltip.directive.ts  # Tooltip para los tokens
-        │   ├── app.ts         # Componente raíz
+        │   ├── app.ts          # Componente raíz
         │   └── app.config.ts
         ├── angular.json
         └── package.json</code></pre>
@@ -104,7 +115,7 @@ Los mensajes son texto plano con prefijos. Las respuestas de IA llevan un cuerpo
 | `SYSTEM:error:...` | server → cliente | Error (p. ej. límite de salas alcanzado) |
 | `JOIN:sala:miembro1,miembro2` | server → cliente | Confirmación de membresía de sala |
 | `ROOM:sala:emisor:texto` | server → cliente | Mensaje entrante de una sala |
-| `AI:{json}` | server → cliente | Respuesta de Yuki (chat dedicado) |
+| `AI:{json}` | server → cliente | Respuesta de Yuki (chat dedicated) |
 | `DIRECTAI:contacto:{json}` | server → cliente | Respuesta de Yuki en un chat 1 a 1 (por `@yuki`) |
 | `ROOMAI:sala:{json}` | server → cliente | Respuesta de Yuki en una sala (por `@yuki`) |
 | `PDF:{json}` | server → cliente | Respuesta del chat de gramática |
@@ -203,9 +214,9 @@ La ingesta es **reanudable**: usa IDs deterministas (idempotentes) y salta las p
 
 ---
 
-## <img src="https://api.iconify.design/ph/cloud-arrow-up-fill.svg?color=%232FB5AE&height=24" height="22"> &nbsp;Despliegue en Render
+## <img src="https://api.iconify.design/ph/cloud-arrow-up-fill.svg?color=%232FB5AE&height=24" height="22"> &nbsp;Despliegue y Alta Disponibilidad
 
-El proyecto se despliega como dos servicios independientes.
+El proyecto se despliega como dos servicios independientes en Render.
 
 ### Backend — Web Service
 
@@ -232,7 +243,7 @@ Render expone el servicio sobre HTTPS, por lo que el WebSocket se conecta vía `
    * **Publish Directory:** `dist/chat-app/browser`
 3. La URL del backend se resuelve sola en [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts); si cambia el dominio del backend, actualiza `PROD_WS_BASE` ahí.
 
-> Recuerda actualizar `allow_origins` en [main.py](backend/main.py) para incluir el dominio del frontend en producción.
+> ⚡ **Disponibilidad sin Cold Starts:** El backend en Render se mantiene constantemente en caliente gracias a un bot de automatización vía GitHub Actions configurado en mi repositorio centralizado [**keep-alive**](https://github.com/mee96/keep-alive), el cual envía pings periódicos a los endpoints correspondientes.
 
 <br/>
 
