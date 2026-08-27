@@ -48,7 +48,7 @@ app.add_middleware(
 
 MAX_ROOMS_PER_USER = 3
 
-GROQ_MODEL = "llama-3.1-8b-instant"
+GROQ_MODEL = "openai/gpt-oss-120b"
 
 AI_SYSTEM_PROMPT = (
     "Et dius Yuki i ets l'assistent d'aquest xat. Ets dolça, amable i una mica "
