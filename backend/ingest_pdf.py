@@ -8,6 +8,7 @@ local. NO s'executa a Render. Ús:  python ingest_pdf.py [ruta1.pdf ruta2.pdf ..
 
 import glob
 import os
+import re
 import sys
 import time
 import uuid
@@ -74,6 +75,18 @@ def upsert_with_retry(
             time.sleep(delay)
 
 
+_BIBLIO_HEADER_RE = re.compile(r"referencias\s+bibliogr[aá]ficas", re.IGNORECASE)
+
+
+def is_bibliography_page(text: str) -> bool:
+    """Detecta pàgines de bibliografia/referències (capçalera "Referencias
+    bibliográficas" repetida a totes les pàgines de l'apartat). Es descarten
+    perquè mai contenen explicacions de gramàtica i, amb els embeddings E5,
+    poden puntuar més alt que contingut rellevant real (falsos positius al
+    retrieval — vist en producció amb preguntes sobre el subjuntiu)."""
+    return bool(_BIBLIO_HEADER_RE.search(text[:80]))
+
+
 def chunk_text(text: str, size: int = 500, overlap: int = 50) -> list[str]:
     """Parteix `text` en chunks de ~`size` paraules amb `overlap` de solapament."""
     words = text.split()
@@ -126,7 +139,11 @@ def main() -> None:
                     skipped_pages += 1
                     print(f"  pàg {page_num}/{num_pages}: ja indexada (saltada)", flush=True)
                     continue
-                chunks = chunk_text(page.extract_text() or "")
+                text = page.extract_text() or ""
+                if is_bibliography_page(text):
+                    print(f"  pàg {page_num}/{num_pages}: bibliografia (saltada)", flush=True)
+                    continue
+                chunks = chunk_text(text)
                 if not chunks:
                     print(f"  pàg {page_num}/{num_pages}: 0 chunks (saltada)", flush=True)
                     continue

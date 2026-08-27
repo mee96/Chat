@@ -52,7 +52,7 @@ Los usuarios entran con un nombre, ven quién está conectado, inician conversac
 | <img src="https://api.iconify.design/ph/desktop-tower-fill.svg?color=%235B9BD5&height=18" height="16"> **Frontend** | Angular 21 (standalone components, signals, `NgOptimizedImage`), TypeScript |
 | <img src="https://api.iconify.design/ph/cpu-fill.svg?color=%232FB5AE&height=18" height="16"> **Backend** | FastAPI, Uvicorn, `websockets` |
 | <img src="https://api.iconify.design/ph/robot-fill.svg?color=%235B9BD5&height=18" height="16"> **IA** | Groq (`AsyncGroq`, modelo `openai/gpt-oss-120b`) |
-| <img src="https://api.iconify.design/ph/database-fill.svg?color=%232FB5AE&height=18" height="16"> **RAG** | Qdrant (vector DB) + `fastembed` (embeddings ONNX, sin torch) |
+| <img src="https://api.iconify.design/ph/database-fill.svg?color=%232FB5AE&height=18" height="16"> **RAG** | Qdrant (vector DB) + Qdrant Cloud Inference (embeddings generados en el servidor, sin cargar ningún modelo en el proceso de Render) |
 | <img src="https://api.iconify.design/ph/plugs-connected-fill.svg?color=%23E0A63B&height=18" height="16"> **Comunicación** | WebSocket (`/ws/{username}`) |
 | <img src="https://api.iconify.design/ph/rocket-launch-fill.svg?color=%235B9BD5&height=18" height="16"> **Deploy** | Render (frontend como Static Site, backend como Web Service) |
 
@@ -180,7 +180,6 @@ El backend lee `backend/.env` (vía `python-dotenv`). Las variables ya definidas
 | `QDRANT_URL` | Chat de gramática | URL del clúster de Qdrant. |
 | `QDRANT_API_KEY` | Chat de gramática | Clave de la API de Qdrant. |
 | `QDRANT_TIMEOUT` | *(opcional)* | Timeout del cliente Qdrant en segundos (por defecto `120`). |
-| `FASTEMBED_CACHE_DIR` | *(opcional)* | Ruta de caché del modelo de embeddings (por defecto `backend/.fastembed_cache`). |
 
 `backend/.env` está en `.gitignore`: **no** se sube al repositorio.
 
@@ -190,9 +189,9 @@ El backend lee `backend/.env` (vía `python-dotenv`). Las variables ya definidas
 
 ## <img src="https://api.iconify.design/ph/book-open-text-fill.svg?color=%235B9BD5&height=24" height="22"> &nbsp;Ingesta de los PDFs (RAG)
 
-El chat **Gramàtica** responde solo a partir de tres tomos de *Gramática descriptiva de la lengua española* (volúmenes 1, 2 y 3), troceados e indexados en Qdrant. La ingesta se ejecuta **una vez en local** (no en Render): descarga el modelo de embeddings y sube los vectores al clúster.
+El chat **Gramàtica** responde solo a partir de tres tomos de *Gramática descriptiva de la lengua española* (volúmenes 1, 2 y 3), troceados e indexados en Qdrant. La ingesta se ejecuta **una vez en local** (no en Render): sube los chunks a Qdrant, que genera los vectores en el servidor (Cloud Inference).
 
-* **Modelo de embeddings:** `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, distancia coseno), vía `fastembed` (ONNX, sin torch) — el mismo modelo para indexar y para buscar, así los vectores son compatibles.
+* **Modelo de embeddings:** `intfloat/multilingual-e5-small` (384 dims, distancia coseno), vía **Qdrant Cloud Inference** — el proceso nunca carga un modelo en local, evitando el OOM del plan gratuito de Render (512Mi). Al pertenecer a la familia E5, los textos se envían con los prefijos `"query: "`/`"passage: "` añadidos manualmente (Qdrant Cloud Inference aún no los aplica automáticamente).
 * **Colección:** `gramatica`.
 * **Troceado:** ~500 palabras por *chunk* con 50 de solapamiento.
 
@@ -273,7 +272,7 @@ Render expone el servicio sobre HTTPS, por lo que el WebSocket se conecta vía `
 * No hay persistencia del historial de mensajes ni base de datos (más allá de los vectores de gramática en Qdrant).
 * La autenticación es nominal (solo nombre de usuario, sin verificación).
 * El chat de gramática depende de una **ingesta previa** de los PDFs a Qdrant (paso manual en local) y de que `GROQ_API_KEY`/`QDRANT_URL`/`QDRANT_API_KEY` estén configuradas.
-* Con la capa gratuita de Groq/Qdrant puede haber **límites de tasa** (respuestas más lentas o reintentos); el modelo `8b` es pequeño y puede fallar en casos límite.
+* Con la capa gratuita de Groq/Qdrant puede haber **límites de tasa** (respuestas más lentas o reintentos).
 * El dominio del backend de producción está fijado como constante en [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts) (`PROD_WS_BASE`).
 
 <br/>

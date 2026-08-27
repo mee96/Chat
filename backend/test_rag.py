@@ -8,7 +8,7 @@ def test_search_returns_chunk_texts_above_threshold(monkeypatch):
             self.score = score
 
     class FakeResult:
-        points = [FakePoint("chunk A", 0.90), FakePoint("chunk B", 0.75)]
+        points = [FakePoint("chunk A", 0.90), FakePoint("chunk B", 0.85)]
 
     class FakeClient:
         def query_points(self, collection_name, query, limit):
@@ -41,8 +41,9 @@ def test_search_filters_out_scores_below_threshold(monkeypatch):
     assert rag.search("una pregunta", threshold=0.70) == ["chunk A"]
 
 
-def test_search_default_top_k_is_two(monkeypatch):
-    # Menys context per petició (413 al pla gratuït de Groq).
+def test_search_default_top_k_is_four(monkeypatch):
+    # Marge perquè el contingut rellevant hi entri encara que alguna cita
+    # bibliogràfica residual el desplaci de les 2 primeres posicions.
     captured = {}
 
     class FakeResult:
@@ -56,7 +57,7 @@ def test_search_default_top_k_is_two(monkeypatch):
     monkeypatch.setattr(rag, "get_client", lambda: FakeClient())
 
     rag.search("una pregunta")
-    assert captured["limit"] == 2
+    assert captured["limit"] == 4
 
 
 def test_query_document_applies_query_prefix():

@@ -25,6 +25,17 @@ def test_chunk_text_empty():
     assert ingest_pdf.chunk_text("") == []
 
 
+def test_is_bibliography_page_detects_header_variants():
+    assert ingest_pdf.is_bibliography_page("Referencias bibliográficas 1572 REFERENCIAS...")
+    assert ingest_pdf.is_bibliography_page("1573 Referencias bibliográficas Gómez López...")
+    assert ingest_pdf.is_bibliography_page("REFERENCIAS BIBLIOGRÁFICAS Alarcos Llorach...")
+
+
+def test_is_bibliography_page_ignores_regular_content():
+    assert not ingest_pdf.is_bibliography_page("El modo subjuntivo se emplea para expresar...")
+    assert not ingest_pdf.is_bibliography_page("")
+
+
 def test_point_id_deterministic_and_unique():
     # Mateixa (font, pàgina, índex) -> mateix id (idempotència en re-executar).
     a = ingest_pdf.point_id_for("a.pdf", 1, 0)

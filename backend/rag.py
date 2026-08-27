@@ -71,7 +71,14 @@ def get_client() -> QdrantClient:
     return _client
 
 
-def search(query: str, top_k: int = 2, threshold: float = SCORE_THRESHOLD) -> list[str]:
+def search(query: str, top_k: int = 4, threshold: float = SCORE_THRESHOLD) -> list[str]:
+    # top_k=4, no 2: amb la banda de scores E5 estreta, algunes cites
+    # bibliogràfiques residuals (llistes que no repeteixen la capçalera de
+    # secció a cada pàgina de continuació, i per tant no les descarta
+    # is_bibliography_page a la ingesta) poden superar el contingut rellevant
+    # real en les 2 primeres posicions. Amb 4 hi ha marge perquè el contingut
+    # útil hi entri encara que vagi acompanyat de soroll; el system prompt del
+    # xat de gramàtica ja està instruït per ignorar context no rellevant.
     result = get_client().query_points(
         collection_name=COLLECTION,
         query=query_document(query),
