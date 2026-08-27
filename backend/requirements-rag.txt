@@ -1,6 +1,7 @@
 # Dependències per a la ingesta/RAG offline — NO les instal·la Render.
-# S'instal·len a part (en local) per processar el PDF. La cerca en temps real i
-# els embeddings usen fastembed (ONNX, lleuger), que ja és al requirements.txt.
+# S'instal·len a part (en local) per processar el PDF. Els embeddings es
+# generen amb Qdrant Cloud Inference (qdrant-client, ja al requirements.txt);
+# aquest fitxer només afegeix el parseig de PDF.
 #
 # Ús:  pip install -r requirements-rag.txt
 

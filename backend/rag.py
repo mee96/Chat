@@ -1,17 +1,18 @@
 """rag.py — Recuperació (retrieval) per al xat de gramàtica: cerca a Qdrant.
 
-Els embeddings (ingesta i query) usen el mateix model via fastembed (ONNX, sense
-torch), de manera que els vectors són compatibles. El client de Qdrant i el model
-s'inicialitzen de forma lazy (una sola vegada) amb QDRANT_URL/QDRANT_API_KEY del .env.
+Els embeddings (ingesta i query) es generen al servidor amb Qdrant Cloud
+Inference (cloud_inference=True): el procés de Render mai carrega cap model
+en local, evitant l'OOM del pla gratuït (512Mi) que fastembed provocava. El
+client de Qdrant s'inicialitza de forma lazy (una sola vegada) amb
+QDRANT_URL/QDRANT_API_KEY del .env.
 """
 
 import os
-import threading
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastembed import TextEmbedding
 from qdrant_client import QdrantClient
+from qdrant_client.models import Document
 
 # Carrega backend/.env perquè get_client() trobi QDRANT_URL/QDRANT_API_KEY encara
 # que rag.py s'usi de forma independent (p. ex. des d'ingest_pdf.py, que no passa
@@ -21,30 +22,35 @@ from qdrant_client import QdrantClient
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
 COLLECTION = "gramatica"
-EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+EMBED_MODEL = "intfloat/multilingual-e5-small"
 VECTOR_SIZE = 384
 
-# Cache local del model (dins del projecte) perquè es pugui baixar al build i
-# reutilitzar entre deploys/arrencades en comptes de baixar-lo de HuggingFace
-# cada cop. Configurable amb FASTEMBED_CACHE_DIR.
-CACHE_DIR = Path(
-    os.environ.get("FASTEMBED_CACHE_DIR", Path(__file__).resolve().parent / ".fastembed_cache")
-)
+# Llindar de score sota el qual es descarta un resultat. Calibrat amb proves
+# reals sobre aquest corpus concret: preguntes dins del temari ~0.86-0.88,
+# preguntes relacionades però absents del corpus ~0.84-0.86, preguntes
+# clarament irrellevants ~0.77-0.82. 0.82 talla només aquest darrer grup.
+#
+# Aquest valor NO és el 0.70 del portfolio (Bunsen) ni s'hi ha de copiar
+# directament: la banda de scores E5 depèn del corpus, no del model. Textos
+# densos de gramàtica en castellà (com aquest) donen scores globalment més
+# alts que el corpus curt i variat del portfolio; calibrar-ho de nou amb
+# preguntes reals sobre el corpus concret cada cop que es canviï.
+SCORE_THRESHOLD = 0.82
 
-_model: TextEmbedding | None = None
-_model_lock = threading.Lock()
 _client: QdrantClient | None = None
 
 
-def get_model() -> TextEmbedding:
-    # Doble comprovació amb lock: la precàrrega d'arrencada s'executa en un fil
-    # a part, així que una petició concurrent no ha de disparar una segona baixada.
-    global _model
-    if _model is None:
-        with _model_lock:
-            if _model is None:
-                _model = TextEmbedding(model_name=EMBED_MODEL, cache_dir=str(CACHE_DIR))
-    return _model
+def query_document(text: str) -> Document:
+    # Aplicat manualment perquè Qdrant Cloud Inference encara no afegeix els
+    # prefixos query:/passage: que la família E5 necessita
+    # (github.com/qdrant/qdrant/issues/9024, obert a 2026-08) — sense el
+    # prefix, incrusta el text literal i la qualitat de cerca es degrada en
+    # silenci.
+    return Document(text=f"query: {text}", model=EMBED_MODEL)
+
+
+def passage_document(text: str) -> Document:
+    return Document(text=f"passage: {text}", model=EMBED_MODEL)
 
 
 def get_client() -> QdrantClient:
@@ -60,17 +66,15 @@ def get_client() -> QdrantClient:
             api_key=os.environ.get("QDRANT_API_KEY"),
             port=None,
             timeout=int(os.environ.get("QDRANT_TIMEOUT", "120")),
+            cloud_inference=True,
         )
     return _client
 
 
-def embed_one(text: str) -> list[float]:
-    return list(get_model().embed([text]))[0].tolist()
-
-
-def search(query: str, top_k: int = 2) -> list[str]:
-    vector = embed_one(query)
+def search(query: str, top_k: int = 2, threshold: float = SCORE_THRESHOLD) -> list[str]:
     result = get_client().query_points(
-        collection_name=COLLECTION, query=vector, limit=top_k
+        collection_name=COLLECTION,
+        query=query_document(query),
+        limit=top_k,
     )
-    return [point.payload["text"] for point in result.points]
+    return [point.payload["text"] for point in result.points if point.score >= threshold]

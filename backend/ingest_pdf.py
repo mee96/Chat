@@ -1,8 +1,9 @@
 """ingest_pdf.py — Ingesta offline dels PDFs cap a Qdrant (s'executa en local).
 
-Llegeix els PDFs de backend/pdfs/, els parteix en chunks, genera embeddings amb
-fastembed (mateix model que la cerca) i els indexa a la col·lecció de Qdrant.
-NO s'executa a Render. Ús:  python ingest_pdf.py [ruta1.pdf ruta2.pdf ...]
+Llegeix els PDFs de backend/pdfs/, els parteix en chunks i els indexa a la
+col·lecció de Qdrant. Els embeddings es generen al servidor amb Qdrant Cloud
+Inference (mateix model que la cerca a rag.py), sense carregar cap model en
+local. NO s'executa a Render. Ús:  python ingest_pdf.py [ruta1.pdf ruta2.pdf ...]
 """
 
 import glob
@@ -14,7 +15,7 @@ import uuid
 import pdfplumber
 from qdrant_client.models import Distance, PointStruct, VectorParams
 
-from rag import COLLECTION, VECTOR_SIZE, get_client, get_model
+from rag import COLLECTION, VECTOR_SIZE, get_client, passage_document
 
 PDF_DIR = os.path.join(os.path.dirname(__file__), "pdfs")
 
@@ -96,10 +97,6 @@ def main() -> None:
         return
     print(f"PDFs a processar ({len(paths)}): {[os.path.basename(p) for p in paths]}", flush=True)
 
-    print("Carregant el model d'embeddings (la primera vegada el descarrega, ~120 MB)...", flush=True)
-    model = get_model()
-    print("Model carregat.", flush=True)
-
     print("Connectant a Qdrant...", flush=True)
     client = get_client()
     if not client.collection_exists(COLLECTION):
@@ -133,13 +130,12 @@ def main() -> None:
                 if not chunks:
                     print(f"  pàg {page_num}/{num_pages}: 0 chunks (saltada)", flush=True)
                     continue
-                print(f"  pàg {page_num}/{num_pages}: {len(chunks)} chunks — generant embeddings...", flush=True)
-                vectors = list(model.embed(chunks))
+                print(f"  pàg {page_num}/{num_pages}: {len(chunks)} chunks", flush=True)
                 points = []
-                for chunk_idx, (chunk, vec) in enumerate(zip(chunks, vectors)):
+                for chunk_idx, chunk in enumerate(chunks):
                     points.append(PointStruct(
                         id=point_id_for(source, page_num, chunk_idx),
-                        vector=vec.tolist(),
+                        vector=passage_document(chunk),
                         payload={"text": chunk, "source": source, "page": page_num},
                     ))
                     total_chunks += 1

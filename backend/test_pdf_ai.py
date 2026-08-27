@@ -1,8 +1,6 @@
 import asyncio
 import json
 
-from fastapi.testclient import TestClient
-
 import main
 import rag
 
@@ -50,16 +48,6 @@ def test_handle_pdf_message_bounds_history(monkeypatch):
     cap = 1 + 2 * main.PDF_MAX_EXCHANGES
     assert len(m.pdf_histories["alice"]) <= cap   # historial emmagatzemat acotat
     assert max(sizes) <= cap                       # cada petició a Groq acotada
-
-
-def test_startup_preloads_embedding_model(monkeypatch):
-    # El model s'ha de precarregar a l'arrencada (lifespan), no de forma lazy a
-    # la primera petició, perquè el primer RAG no falli ni bloquegi el loop.
-    calls = []
-    monkeypatch.setattr(rag, "get_model", lambda: calls.append("loaded"))
-    with TestClient(main.app):
-        pass
-    assert calls == ["loaded"]
 
 
 def _mgr_with_capture(monkeypatch):
