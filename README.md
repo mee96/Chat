@@ -7,7 +7,7 @@
 ![Angular](https://img.shields.io/badge/Angular-21-a8c4f0?style=for-the-badge&logo=angular&logoColor=1b2e4b)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-5b9bd5?style=for-the-badge&logo=fastapi&logoColor=ffffff)
 ![Python](https://img.shields.io/badge/Python-3.11-b8e8d4?style=for-the-badge&logo=python&logoColor=1b2e4b)
-![Groq](https://img.shields.io/badge/Groq-Llama_3.1-2fb5ae?style=for-the-badge&logoColor=ffffff)
+![Groq](https://img.shields.io/badge/Groq-GPT_OSS_120B-2fb5ae?style=for-the-badge&logoColor=ffffff)
 ![Qdrant](https://img.shields.io/badge/Qdrant-RAG-f0e4a0?style=for-the-badge&logoColor=1b2e4b)
 
 <br/>
@@ -40,7 +40,7 @@ Los usuarios entran con un nombre, ven quién está conectado, inician conversac
 | :--- | :--- |
 | <img src="https://api.iconify.design/ph/desktop-tower-fill.svg?color=%235B9BD5&height=18" height="16"> **Frontend** | Angular 21 (standalone components, signals, `NgOptimizedImage`), TypeScript |
 | <img src="https://api.iconify.design/ph/cpu-fill.svg?color=%232FB5AE&height=18" height="16"> **Backend** | FastAPI, Uvicorn, `websockets` |
-| <img src="https://api.iconify.design/ph/robot-fill.svg?color=%235B9BD5&height=18" height="16"> **IA** | Groq (`AsyncGroq`, modelo `llama-3.1-8b-instant`) |
+| <img src="https://api.iconify.design/ph/robot-fill.svg?color=%235B9BD5&height=18" height="16"> **IA** | Groq (`AsyncGroq`, modelo `openai/gpt-oss-120b`) |
 | <img src="https://api.iconify.design/ph/database-fill.svg?color=%232FB5AE&height=18" height="16"> **RAG** | Qdrant (vector DB) + `fastembed` (embeddings ONNX, sin torch) |
 | <img src="https://api.iconify.design/ph/plugs-connected-fill.svg?color=%23E0A63B&height=18" height="16"> **Comunicación** | WebSocket (`/ws/{username}`) |
 | <img src="https://api.iconify.design/ph/rocket-launch-fill.svg?color=%235B9BD5&height=18" height="16"> **Deploy** | Render (frontend como Static Site, backend como Web Service) |
@@ -246,7 +246,7 @@ Render expone el servicio sobre HTTPS, por lo que el WebSocket se conecta vía `
 * **Salas de grupo** — crear grupos con nombre seleccionando varios usuarios; mensajes difundidos a todos los miembros.
 * **Límite de salas** — máximo de 3 salas por usuario, controlado por el servidor.
 * **Re-sincronización de salas** — al reconectar, el usuario recupera las salas a las que pertenece.
-* **Yuki, la IA del chat** — asistente basado en Groq (`llama-3.1-8b-instant`), que responde en el idioma del usuario y mantiene **historial por usuario**. Cada respuesta muestra los **tokens** consumidos, con un **tooltip** al pasar por encima (prompt · respuesta · total).
+* **Yuki, la IA del chat** — asistente basado en Groq (`openai/gpt-oss-120b`), que responde en el idioma del usuario y mantiene **historial por usuario**. Cada respuesta muestra los **tokens** consumidos, con un **tooltip** al pasar por encima (prompt · respuesta · total).
 * **`@yuki` en todas las conversaciones** — menciona `@yuki` en un chat 1 a 1 o en una sala y responde ahí mismo para todos los participantes; además tiene su propio chat dedicado.
 * **Chat de Gramática (RAG)** — el chat *"Gramàtica"* responde **solo** con el contenido de los tres tomos de gramática indexados en Qdrant; si la pregunta se sale del contexto, lo dice en vez de inventar.
 * **Diseño responsive (móvil)** — patrón tipo Messenger/WhatsApp: en pantallas estrechas (≤ 768 px) se ve primero la lista de chats y, al abrir una conversación, esta ocupa toda la pantalla con un botón de "atrás".
