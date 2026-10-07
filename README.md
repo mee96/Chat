@@ -26,7 +26,7 @@
 &nbsp;
 [![GitHub Repo](https://img.shields.io/badge/🐙_GitHub_Repo-b8e8d4?style=flat-square&logoColor=1b2e4b)](https://github.com/mee96/Chat)
 &nbsp;
-[![Keep Alive Active](https://img.shields.io/badge/Keep--Alive-Active-b8e8d4?style=flat-square&logo=githubactions&logoColor=1b2e4b)](https://github.com/mee96/keep-alive)
+![Render Free Tier](https://img.shields.io/badge/Render_Free_Tier-Cold_start_~1_min-f0e4a0?style=flat-square&logo=render&logoColor=2d1b6e)
 
 </div>
 
@@ -152,7 +152,7 @@ uvicorn main:app --reload</code></pre>
 
 The backend will be available at `http://localhost:8000` and the WebSocket at `ws://localhost:8000/ws/{username}`.
 
-> ⚡ **Availability:** the production backend on Render stays active without *cold starts*, thanks to automatic pings from [Keep-Alive](https://github.com/mee96/keep-alive).
+> ⏳ **Availability:** The backend runs on Render's free tier and sleeps after a period of inactivity. The first request may take 30–60 seconds while the server wakes up; after that it responds normally.
 
 > The backend's CORS allows `http://localhost:4200` (Angular's dev server) by default.
 
@@ -244,7 +244,7 @@ Render serves the service over HTTPS, so the WebSocket connects via `wss://`.
    * **Publish Directory:** `dist/chat-app/browser`
 3. The backend URL resolves itself in [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts); if the backend's domain changes, update `PROD_WS_BASE` there.
 
-> ⚡ **No Cold Starts:** the backend on Render is kept constantly warm thanks to an automation bot running on GitHub Actions in my centralized [**keep-alive**](https://github.com/mee96/keep-alive) repository, which sends periodic pings to the relevant endpoints.
+> ⏳ **Cold starts:** Render's free tier suspends the backend when it's idle, so the first connection after a while may take 30–60 seconds. If you deploy your own copy and want to avoid this, schedule a periodic ping to `/health` (for example with [cron-job.org](https://cron-job.org/)) — keep in mind it consumes free-tier instance hours.
 
 <br/>
 

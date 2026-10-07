@@ -26,7 +26,7 @@
 &nbsp;
 [![GitHub Repo](https://img.shields.io/badge/🐙_GitHub_Repo-b8e8d4?style=flat-square&logoColor=1b2e4b)](https://github.com/mee96/Chat)
 &nbsp;
-[![Keep Alive Active](https://img.shields.io/badge/Keep--Alive-Active-b8e8d4?style=flat-square&logo=githubactions&logoColor=1b2e4b)](https://github.com/mee96/keep-alive)
+![Render Free Tier](https://img.shields.io/badge/Render_Free_Tier-Cold_start_~1_min-f0e4a0?style=flat-square&logo=render&logoColor=2d1b6e)
 
 </div>
 
@@ -152,7 +152,7 @@ uvicorn main:app --reload</code></pre>
 
 El backend quedarà disponible a `http://localhost:8000` i el WebSocket a `ws://localhost:8000/ws/{username}`.
 
-> ⚡ **Disponibilitat:** el backend de producció a Render es manté actiu sense *cold starts*, gràcies a pings automàtics de [Keep-Alive](https://github.com/mee96/keep-alive).
+> ⏳ **Disponibilitat:** El backend està allotjat al pla gratuït de Render i se suspèn després d'un període d'inactivitat. La primera petició pot trigar 30–60 segons mentre el servidor arrenca; després respon amb normalitat.
 
 > El CORS del backend permet per defecte l'origen `http://localhost:4200` (el dev server d'Angular).
 
@@ -244,7 +244,7 @@ Render exposa el servei sobre HTTPS, per la qual cosa el WebSocket es connecta v
    * **Publish Directory:** `dist/chat-app/browser`
 3. La URL del backend es resol sola a [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts); si canvia el domini del backend, actualitza `PROD_WS_BASE` allà.
 
-> ⚡ **Sense Cold Starts:** el backend a Render es manté constantment en calent gràcies a un bot d'automatització via GitHub Actions configurat al meu repositori centralitzat [**keep-alive**](https://github.com/mee96/keep-alive), que envia pings periòdics als endpoints corresponents.
+> ⏳ **Cold starts:** el pla gratuït de Render suspèn el backend quan està inactiu, així que la primera connexió després d'una estona pot trigar 30–60 segons. Si desplegues la teva pròpia còpia i ho vols evitar, programa un ping periòdic a `/health` (per exemple amb [cron-job.org](https://cron-job.org/)) — tingues en compte que consumeix hores d'instància del pla gratuït.
 
 <br/>
 

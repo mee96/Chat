@@ -26,7 +26,7 @@
 &nbsp;
 [![GitHub Repo](https://img.shields.io/badge/🐙_GitHub_Repo-b8e8d4?style=flat-square&logoColor=1b2e4b)](https://github.com/mee96/Chat)
 &nbsp;
-[![Keep Alive Active](https://img.shields.io/badge/Keep--Alive-Active-b8e8d4?style=flat-square&logo=githubactions&logoColor=1b2e4b)](https://github.com/mee96/keep-alive)
+![Render Free Tier](https://img.shields.io/badge/Render_Free_Tier-Cold_start_~1_min-f0e4a0?style=flat-square&logo=render&logoColor=2d1b6e)
 
 </div>
 
@@ -152,7 +152,7 @@ uvicorn main:app --reload</code></pre>
 
 El backend quedará disponible en `http://localhost:8000` y el WebSocket en `ws://localhost:8000/ws/{username}`.
 
-> ⚡ **Disponibilidad:** el backend de producción en Render se mantiene activo sin *cold starts*, gracias a pings automáticos de [Keep-Alive](https://github.com/mee96/keep-alive).
+> ⏳ **Disponibilidad:** El backend está alojado en el plan gratuito de Render y se suspende tras un periodo de inactividad. La primera petición puede tardar 30–60 segundos mientras el servidor arranca; después responde con normalidad.
 
 > El CORS del backend permite por defecto el origen `http://localhost:4200` (el dev server de Angular).
 
@@ -244,7 +244,7 @@ Render expone el servicio sobre HTTPS, por lo que el WebSocket se conecta vía `
    * **Publish Directory:** `dist/chat-app/browser`
 3. La URL del backend se resuelve sola en [ws-url.ts](frontend/chat-app/src/app/chat/ws-url.ts); si cambia el dominio del backend, actualiza `PROD_WS_BASE` ahí.
 
-> ⚡ **Sin Cold Starts:** el backend en Render se mantiene constantemente en caliente gracias a un bot de automatización vía GitHub Actions configurado en mi repositorio centralizado [**keep-alive**](https://github.com/mee96/keep-alive), que envía pings periódicos a los endpoints correspondientes.
+> ⏳ **Cold starts:** el plan gratuito de Render suspende el backend cuando está inactivo, así que la primera conexión tras un rato puede tardar 30–60 segundos. Si despliegas tu propia copia y quieres evitarlo, programa un ping periódico a `/health` (por ejemplo con [cron-job.org](https://cron-job.org/)) — ten en cuenta que consume horas de instancia del plan gratuito.
 
 <br/>
 
